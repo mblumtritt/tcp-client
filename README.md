@@ -1,0 +1,55 @@
+# TCPClient
+
+A TCP client implementation with working timeout support.
+
+## Description
+This gem implements a TCP client with (optional) SSL support. The motivation of this project is the need to have a _really working_ easy to use client which can handle time limits correctly. Unlike other implementations this client respects given/configurable time limits for each method (`connect`, `read`, `write`).
+
+## Sample
+
+```ruby
+configuration = TCPClient::Configuration.create do |cfg|
+  cfg.connect_timeout = 1 # second to connect the server
+  cfg.write_timeout = 0.25 # seconds to write a single data junk
+  cfg.read_timeout = 0.25 # seconds to read some bytes
+  cfg.ssl_params = {} # use SSL, but without any specific parameters
+end
+
+# the following request sequence is not allowed to last longer than 1.5 seconds:
+# 1 second to connect (incl. SSL handshake etc.)
+# + 0.25 seconds to write data
+# + 0.25 seconds to read
+# a response
+TCPClient.open('www.google.com:443', configuration) do |client|
+  pp client.write("GET / HTTP/1.1\r\nHost: google.com\r\n\r\n") # simple HTTP get request
+  pp client.read(12) # "HTTP/1.1 " + 3 byte HTTP status code
+end
+```
+
+### Installation
+
+Use [Bundler](http://gembundler.com/) to use TCPClient in your own project:
+
+Add to your `Gemfile`:
+
+```ruby
+gem 'tcp-client'
+```
+
+and install it by running Bundler:
+
+```bash
+$ bundle
+```
+
+To install the gem globally use:
+
+```bash
+$ gem install tcp-client
+```
+
+After that you need only a single line of code in your project code to have all tools on board:
+
+```ruby
+require 'tcp-client'
+```

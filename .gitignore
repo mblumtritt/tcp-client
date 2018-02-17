@@ -1,0 +1,4 @@
+_local/
+tmp/
+pkg/
+gems.locked
