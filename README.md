@@ -15,7 +15,7 @@ configuration = TCPClient::Configuration.create do |cfg|
   cfg.ssl_params = {} # use SSL, but without any specific parameters
 end
 
-# the following request sequence is not allowed to last longer than 1.5 seconds:
+# the following request sequence is not allowed to last not longer than 1.5 seconds:
 # 1 second to connect (incl. SSL handshake etc.)
 # + 0.25 seconds to write data
 # + 0.25 seconds to read

@@ -6,7 +6,7 @@ configuration = TCPClient::Configuration.create do |cfg|
   cfg.read_timeout = 0.25 # seconds to read some bytes
 end
 
-# the following request sequence is not allowed to last longer than 0.75 seconds:
+# the following request sequence is not allowed to last not longer than 0.75 seconds:
 # 0.5 seconds to connect
 # + 0.25 seconds to write data
 # + 0.25 seconds to read
