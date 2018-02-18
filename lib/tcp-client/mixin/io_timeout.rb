@@ -6,21 +6,21 @@ module IOTimeoutMixin
     mod.include(im.index(:wait_writable) && im.index(:wait_readable) ? WithDeadlineMethods : WidthDeadlineIO)
   end
 
-  def read(nbytes, timeout: nil)
+  def read(nbytes, timeout: nil, exception: IOTimeoutError)
     timeout = timeout.to_f
     return read_all(nbytes){ |junk_size| super(junk_size) } if timeout <= 0
     deadline = Time.now + timeout
     read_all(nbytes) do |junk_size|
-      with_deadline(deadline){ read_nonblock(junk_size, exception: false) }
+      with_deadline(deadline, exception){ read_nonblock(junk_size, exception: false) }
     end
   end
 
-  def write(*args, timeout: nil)
+  def write(*msgs, timeout: nil, exception: IOTimeoutError)
     timeout = timeout.to_f
-    return write_all(args.join){ |junk| super(junk) } if timeout <= 0
+    return write_all(msgs.join){ |junk| super(junk) } if timeout <= 0
     deadline = Time.now + timeout
-    write_all(args.join) do |junk|
-      with_deadline(deadline){ write_nonblock(junk, exception: false) }
+    write_all(msgs.join) do |junk|
+      with_deadline(deadline, exception){ write_nonblock(junk, exception: false) }
     end
   end
 
@@ -53,15 +53,15 @@ module IOTimeoutMixin
   module WithDeadlineMethods
     private
 
-    def with_deadline(deadline)
+    def with_deadline(deadline, exclass)
       loop do
         case ret = yield
         when :wait_writable
           remaining_time = deadline - Time.now
-          raise(IOTimeoutError) if remaining_time <= 0 || wait_writable(remaining_time).nil?
+          raise(exclass) if remaining_time <= 0 || wait_writable(remaining_time).nil?
         when :wait_readable
           remaining_time = deadline - Time.now
-          raise(IOTimeoutError) if remaining_time <= 0 || wait_readable(remaining_time).nil?
+          raise(exclass) if remaining_time <= 0 || wait_readable(remaining_time).nil?
         else
           return ret
         end
@@ -72,15 +72,15 @@ module IOTimeoutMixin
   module WidthDeadlineIO
     private
 
-    def with_deadline(deadline)
+    def with_deadline(deadline, exclass)
       loop do
         case ret = yield
         when :wait_writable
           remaining_time = deadline - Time.now
-          raise(IOTimeoutError) if remaining_time <= 0 || ::IO.select(nil, [self], nil, remaining_time).nil?
+          raise(exclass) if remaining_time <= 0 || ::IO.select(nil, [self], nil, remaining_time).nil?
         when :wait_readable
           remaining_time = deadline - Time.now
-          raise(IOTimeoutError) if remaining_time <= 0 || ::IO.select([self], nil, nil, remaining_time).nil?
+          raise(exclass) if remaining_time <= 0 || ::IO.select([self], nil, nil, remaining_time).nil?
         else
           return ret
         end

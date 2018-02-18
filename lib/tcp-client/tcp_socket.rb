@@ -5,17 +5,18 @@ class TCPClient
   class TCPSocket < ::Socket
     include IOTimeoutMixin
 
-    def initialize(address, configuration)
+    def initialize(address, configuration, exception)
       super(address.addrinfo.ipv6? ? :INET6 : :INET, :STREAM)
       configure(configuration)
-      connect_to(address, configuration.connect_timeout)
+      connect_to(address, configuration.connect_timeout, exception)
     end
 
     private
 
-    def connect_to(address, timeout)
+    def connect_to(address, timeout, exception)
       addr = ::Socket.pack_sockaddr_in(address.addrinfo.ip_port, address.addrinfo.ip_address)
-      timeout ? with_deadline(Time.now + timeout){ connect_nonblock(addr, exception: false) } : connect(addr)
+      return connect(addr) unless timeout
+      with_deadline(Time.now + timeout, exception){ connect_nonblock(addr, exception: false) }
     end
 
     def configure(configuration)

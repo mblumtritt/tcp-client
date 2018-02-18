@@ -19,6 +19,8 @@ class TCPClient
     end
   end
 
+  Timeout = Class.new(IOError)
+
   def self.open(addr, configuration = Configuration.new)
     addr = Address.new(addr)
     client = new
@@ -44,8 +46,8 @@ class TCPClient
     close
     NoOpenSSL.raise! if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(addr)
-    @socket = TCPSocket.new(@address, configuration)
-    @socket = SSLSocket.new(@socket, @address, configuration) if configuration.ssl?
+    @socket = TCPSocket.new(@address, configuration, Timeout)
+    @socket = SSLSocket.new(@socket, @address, configuration, Timeout) if configuration.ssl?
     @write_timeout = configuration.write_timeout
     @read_timeout = configuration.read_timeout
     self
@@ -64,11 +66,10 @@ class TCPClient
   end
 
   def read(nbytes, timeout: @read_timeout)
-    closed? ? NotConnected.raise!(self) : @socket.read(nbytes, timeout: timeout)
+    closed? ? NotConnected.raise!(self) : @socket.read(nbytes, timeout: timeout, exception: Timeout)
   end
 
-  def write(*args, timeout: @write_timeout)
-    closed? ? NotConnected.raise!(self)  : @socket.write(*args, timeout: timeout)
+  def write(*msg, timeout: @write_timeout)
+    closed? ? NotConnected.raise!(self)  : @socket.write(*msg, timeout: timeout, exception: Timeout)
   end
 end
-

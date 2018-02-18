@@ -13,7 +13,7 @@ class TCPClient
       when Integer
         init_from_addrinfo(Addrinfo.tcp(nil, addr))
       when Addrinfo
-        init_from_addrinfo(add)
+        init_from_addrinfo(addr)
       else
         init_from_string(addr)
       end
@@ -24,8 +24,9 @@ class TCPClient
 
     def init_from_string(str)
       @hostname, port = from_string(str.to_s)
+      return init_from_addrinfo(Addrinfo.tcp(nil, port)) unless @hostname
       @addrinfo = Addrinfo.tcp(@hostname, port)
-      @to_s = "#{@hostname}:#{port}"
+      @to_s = @hostname.index(':') ? "[#{@hostname}]:#{port}" : "#{@hostname}:#{port}"
     end
 
     def init_from_selfclass(address)

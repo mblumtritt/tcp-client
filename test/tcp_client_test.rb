@@ -26,10 +26,10 @@ class TCPClientTest < Test
   def test_failed_state
     subject = create_nonconnected_client
     assert(subject.closed?)
-    assert_equal(':0', subject.to_s)
+    assert_equal('localhost:0', subject.to_s)
     refute_nil(subject.address)
-    assert_equal(':0', subject.address.to_s)
-    assert_nil(subject.address.hostname)
+    assert_equal('localhost:0', subject.address.to_s)
+    assert_equal('localhost', subject.address.hostname)
     assert_instance_of(Addrinfo, subject.address.addrinfo)
     assert_same(0, subject.address.addrinfo.ip_port)
     assert_raises(TCPClient::NotConnected) do
@@ -64,13 +64,13 @@ class TCPClientTest < Test
     TCPClient.open(addr) do |subject|
       refute(subject.closed?)
       start_time = nil
-      assert_raises(IOTimeoutError) do
+      assert_raises(TCPClient::Timeout) do
         start_time = Time.now
         # we need to send 1MB to avoid any TCP stack buffering
         subject.write('?' * (1024 * 1024), timeout: timeout)
       end
       assert_in_delta(timeout, Time.now - start_time, 0.02)
-      assert_raises(IOTimeoutError) do
+      assert_raises(TCPClient::Timeout) do
         start_time = Time.now
         subject.read(42, timeout: timeout)
       end
@@ -89,7 +89,7 @@ class TCPClientTest < Test
 
   def check_connect_timeout(addr, config, timeout)
     start_time = nil
-    assert_raises(IOTimeoutError) do
+    assert_raises(TCPClient::Timeout) do
       start_time = Time.now
       TCPClient.new.connect(addr, config)
     end

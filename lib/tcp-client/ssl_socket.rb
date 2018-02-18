@@ -10,10 +10,10 @@ class TCPClient
   class SSLSocket < ::OpenSSL::SSL::SSLSocket
     include IOTimeoutMixin
 
-    def initialize(socket, address, configuration)
+    def initialize(socket, address, configuration, exception)
       ssl_params = Hash[configuration.ssl_params]
       super(socket, create_context(ssl_params))
-      connect_to(address, configuration.connect_timeout)
+      connect_to(address, configuration.connect_timeout, exception)
     end
 
     private
@@ -24,9 +24,9 @@ class TCPClient
       ctx
     end
 
-    def connect_to(address, timeout)
+    def connect_to(address, timeout, exception)
       self.hostname = address.hostname
-      timeout ? with_deadline(Time.now + timeout){ connect_nonblock(exception: false) } : connect
+      timeout ? with_deadline(Time.now + timeout, exception){ connect_nonblock(exception: false) } : connect
       post_connection_check(address.hostname)
     end
   end
