@@ -98,9 +98,8 @@ class TCPClientTest < Test
 
   def test_connect_ssl_timeout
     server = TCPServer.new(1236)
-    config = TCPClient::Configuration.create do |cfg|
-      cfg.ssl_params = {}
-    end
+    config = TCPClient::Configuration.new
+    config.ssl = true
     [0.5, 1, 1.5].each do |timeout|
       config.timeout = timeout
       check_connect_timeout('localhost:1236', config, timeout)

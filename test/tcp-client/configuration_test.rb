@@ -16,7 +16,7 @@ class ConfigurationTest < Test
     subject = TCPClient::Configuration.create do |cfg|
       cfg.buffered = cfg.keep_alive = cfg.reverse_lookup = false
       cfg.timeout = 42
-      cfg.ssl_params = {}
+      cfg.ssl = true
     end
     refute(subject.buffered)
     refute(subject.keep_alive)
@@ -25,6 +25,18 @@ class ConfigurationTest < Test
     assert_same(42, subject.read_timeout)
     assert_same(42, subject.write_timeout)
     assert(subject.ssl?)
+  end
+
+  def test_ssl_params
+    subject = TCPClient::Configuration.new
+    refute(subject.ssl?)
+    assert_nil(subject.ssl_params)
+    subject.ssl = true
+    assert(subject.ssl?)
+    assert_empty(subject.ssl_params)
+    subject.ssl_params[:ssl_version] = :TLSv1_2
+    subject.ssl = false
+    assert_nil(subject.ssl_params)
   end
 
   def test_timeout_overwrite
