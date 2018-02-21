@@ -27,7 +27,7 @@ module IOTimeoutMixin
   private
 
   def read_all(nbytes)
-    return '' if nbytes == 0
+    return '' if 0 == nbytes
     result = ''
     loop do
       unless read = yield(nbytes - result.bytesize)

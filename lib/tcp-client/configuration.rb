@@ -21,7 +21,7 @@ class TCPClient
     def ssl=(yn)
       return @ssl_params = nil unless yn
       return @ssl_params = yn if Hash === yn
-      @ssl_params = {} unless @ssl_params
+      @ssl_params ||= {}
     end
 
     def buffered=(yn)

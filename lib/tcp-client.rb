@@ -70,7 +70,7 @@ class TCPClient
   end
 
   def write(*msg, timeout: @write_timeout)
-    closed? ? NotConnected.raise!(self)  : @socket.write(*msg, timeout: timeout, exception: Timeout)
+    closed? ? NotConnected.raise!(self) : @socket.write(*msg, timeout: timeout, exception: Timeout)
   end
 
   def flush
