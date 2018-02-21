@@ -13,7 +13,12 @@ class TCPClient
     def initialize(socket, address, configuration, exception)
       ssl_params = Hash[configuration.ssl_params]
       super(socket, create_context(ssl_params))
-      connect_to(address, configuration.connect_timeout, exception)
+      connect_to(
+        address,
+        ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE,
+        configuration.connect_timeout,
+        exception
+      )
     end
 
     private
@@ -24,10 +29,10 @@ class TCPClient
       ctx
     end
 
-    def connect_to(address, timeout, exception)
+    def connect_to(address, check, timeout, exception)
       self.hostname = address.hostname
       timeout ? with_deadline(Time.now + timeout, exception){ connect_nonblock(exception: false) } : connect
-      post_connection_check(address.hostname)
+      post_connection_check(address.hostname) if check
     end
   end
 
