@@ -15,7 +15,7 @@ class TCPClient
 
   class NotConnected < SocketError
     def self.raise!(which)
-      raise(self, format('client not connected - %s', which), caller(1))
+      raise(self, "client not connected - #{which}", caller(1))
     end
   end
 
@@ -25,11 +25,9 @@ class TCPClient
     addr = Address.new(addr)
     client = new
     client.connect(addr, configuration)
-    return yield(client) if block_given?
-    client, ret = nil, client
-    ret
+    block_given? ? yield(client) : client
   ensure
-    client.close if client
+    client&.close if block_given?
   end
 
   attr_reader :address
@@ -47,7 +45,9 @@ class TCPClient
     NoOpenSSL.raise! if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(addr)
     @socket = TCPSocket.new(@address, configuration, Timeout)
-    @socket = SSLSocket.new(@socket, @address, configuration, Timeout) if configuration.ssl?
+    configuration.ssl? && @socket = SSLSocket.new(
+      @socket, @address, configuration, Timeout
+    )
     @write_timeout = configuration.write_timeout
     @read_timeout = configuration.read_timeout
     self
@@ -55,7 +55,7 @@ class TCPClient
 
   def close
     socket, @socket = @socket, nil
-    socket.close if socket
+    socket&.close
     self
   rescue IOError
     self
@@ -66,11 +66,13 @@ class TCPClient
   end
 
   def read(nbytes, timeout: @read_timeout)
-    closed? ? NotConnected.raise!(self) : @socket.read(nbytes, timeout: timeout, exception: Timeout)
+    NotConnected.raise!(self) if closed?
+    @socket.read(nbytes, timeout: timeout, exception: Timeout)
   end
 
   def write(*msg, timeout: @write_timeout)
-    closed? ? NotConnected.raise!(self) : @socket.write(*msg, timeout: timeout, exception: Timeout)
+    NotConnected.raise!(self) if closed?
+    @socket.write(*msg, timeout: timeout, exception: Timeout)
   end
 
   def flush

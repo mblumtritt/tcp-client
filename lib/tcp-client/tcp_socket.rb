@@ -14,9 +14,13 @@ class TCPClient
     private
 
     def connect_to(address, timeout, exception)
-      addr = ::Socket.pack_sockaddr_in(address.addrinfo.ip_port, address.addrinfo.ip_address)
+      addr = ::Socket.pack_sockaddr_in(
+        address.addrinfo.ip_port, address.addrinfo.ip_address
+      )
       return connect(addr) unless timeout
-      with_deadline(Time.now + timeout, exception){ connect_nonblock(addr, exception: false) }
+      with_deadline(Time.now + timeout, exception) do
+        connect_nonblock(addr, exception: false)
+      end
     end
 
     def configure(configuration)

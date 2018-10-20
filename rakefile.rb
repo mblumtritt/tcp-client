@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bundler/gem_tasks'
 require 'rake/testtask'
 
@@ -8,5 +10,5 @@ Rake::TestTask.new(:test) do |t|
 end
 
 task :default do
-  exec('rake -T')
+  exec("#{$0} --tasks")
 end

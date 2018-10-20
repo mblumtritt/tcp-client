@@ -3,7 +3,11 @@ IOTimeoutError = Class.new(IOError) unless defined?(IOTimeoutError)
 module IOTimeoutMixin
   def self.included(mod)
     im = mod.instance_methods
-    mod.include(im.index(:wait_writable) && im.index(:wait_readable) ? WithDeadlineMethods : WidthDeadlineIO)
+    if im.index(:wait_writable) && im.index(:wait_readable)
+      mod.include(DeadlineMethods)
+    else
+      mod.include(DeadlineIO)
+    end
   end
 
   def read(nbytes, timeout: nil, exception: IOTimeoutError)
@@ -11,7 +15,9 @@ module IOTimeoutMixin
     return read_all(nbytes){ |junk_size| super(junk_size) } if timeout <= 0
     deadline = Time.now + timeout
     read_all(nbytes) do |junk_size|
-      with_deadline(deadline, exception){ read_nonblock(junk_size, exception: false) }
+      with_deadline(deadline, exception) do
+        read_nonblock(junk_size, exception: false)
+      end
     end
   end
 
@@ -20,7 +26,9 @@ module IOTimeoutMixin
     return write_all(msgs.join){ |junk| super(junk) } if timeout <= 0
     deadline = Time.now + timeout
     write_all(msgs.join) do |junk|
-      with_deadline(deadline, exception){ write_nonblock(junk, exception: false) }
+      with_deadline(deadline, exception) do
+        write_nonblock(junk, exception: false)
+      end
     end
   end
 
@@ -50,18 +58,18 @@ module IOTimeoutMixin
     end
   end
 
-  module WithDeadlineMethods
+  module DeadlineMethods
     private
 
     def with_deadline(deadline, exclass)
       loop do
         case ret = yield
         when :wait_writable
-          remaining_time = deadline - Time.now
-          raise(exclass) if remaining_time <= 0 || wait_writable(remaining_time).nil?
+          raise(exclass) if (remaining_time = deadline - Time.now) <= 0
+          raise(exclass) if wait_writable(remaining_time).nil?
         when :wait_readable
-          remaining_time = deadline - Time.now
-          raise(exclass) if remaining_time <= 0 || wait_readable(remaining_time).nil?
+          raise(exclass) if (remaining_time = deadline - Time.now) <= 0
+          raise(exclass) if wait_readable(remaining_time).nil?
         else
           return ret
         end
@@ -69,18 +77,18 @@ module IOTimeoutMixin
     end
   end
 
-  module WidthDeadlineIO
+  module DeadlineIO
     private
 
     def with_deadline(deadline, exclass)
       loop do
         case ret = yield
         when :wait_writable
-          remaining_time = deadline - Time.now
-          raise(exclass) if remaining_time <= 0 || ::IO.select(nil, [self], nil, remaining_time).nil?
+          raise(exclass) if (remaining_time = deadline - Time.now) <= 0
+          raise(exclass) if ::IO.select(nil, [self], nil, remaining_time).nil?
         when :wait_readable
-          remaining_time = deadline - Time.now
-          raise(exclass) if remaining_time <= 0 || ::IO.select([self], nil, nil, remaining_time).nil?
+          raise(exclass) if (remaining_time = deadline - Time.now) <= 0
+          raise(exclass) if ::IO.select([self], nil, nil, remaining_time).nil?
         else
           return ret
         end
@@ -88,5 +96,5 @@ module IOTimeoutMixin
     end
   end
 
-  private_constant :WithDeadlineMethods, :WidthDeadlineIO
+  private_constant :DeadlineMethods, :DeadlineIO
 end

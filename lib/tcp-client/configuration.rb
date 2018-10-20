@@ -68,7 +68,7 @@ class TCPClient
     private
 
     def seconds(value)
-      value && value > 0 ? value : nil
+      value&.positive? ? value : nil
     end
   end
 end

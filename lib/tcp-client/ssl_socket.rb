@@ -31,7 +31,13 @@ class TCPClient
 
     def connect_to(address, check, timeout, exception)
       self.hostname = address.hostname
-      timeout ? with_deadline(Time.now + timeout, exception){ connect_nonblock(exception: false) } : connect
+      if timeout
+        with_deadline(Time.now + timeout, exception) do
+          connect_nonblock(exception: false)
+        end
+      else
+        connect
+      end
       post_connection_check(address.hostname) if check
     end
   end

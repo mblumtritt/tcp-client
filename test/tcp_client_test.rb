@@ -57,7 +57,7 @@ class TCPClientTest < Test
       assert_same(address_when_opened, subject.address)
     end
   ensure
-    server.close if server
+    server&.close
   end
 
   def check_read_write_timeout(addr, timeout)
@@ -69,7 +69,7 @@ class TCPClientTest < Test
         # we need to send 1MB to avoid any TCP stack buffering
         subject.write('?' * (1024 * 1024), timeout: timeout)
       end
-      assert_in_delta(timeout, Time.now - start_time, 0.02)
+      assert_in_delta(timeout, Time.now - start_time, 0.05)
       assert_raises(TCPClient::Timeout) do
         start_time = Time.now
         subject.read(42, timeout: timeout)
@@ -84,7 +84,7 @@ class TCPClientTest < Test
       check_read_write_timeout(':1235', timeout)
     end
   ensure
-    server.close if server
+    server&.close
   end
 
   def check_connect_timeout(addr, config, timeout)
@@ -105,6 +105,6 @@ class TCPClientTest < Test
       check_connect_timeout('localhost:1236', config, timeout)
     end
   ensure
-    server.close if server
+    server&.close
   end
 end
