@@ -47,7 +47,7 @@ To install the gem globally use:
 $ gem install tcp-client
 ```
 
-After that you need only a single line of code in your project code to have all tools on board:
+After that you need only a single line of code in your project to have all tools on board:
 
 ```ruby
 require 'tcp-client'
