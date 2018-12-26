@@ -10,5 +10,5 @@ Rake::TestTask.new(:test) do |t|
 end
 
 task :default do
-  exec("#{$0} --tasks")
+  exec("#{$PROGRAM_NAME} --tasks")
 end
