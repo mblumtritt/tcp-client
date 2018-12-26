@@ -16,7 +16,9 @@ GemSpec = Gem::Specification.new do |spec|
   spec.author = 'Mike Blumtritt'
   spec.email = 'mike.blumtritt@invision.de'
   spec.homepage = 'https://github.com/mblumtritt/tcp-client'
-  spec.metadata = {'issue_tracker' => 'https://github.com/mblumtritt/tcp-client/issues'}
+  spec.metadata = {
+    'issue_tracker' => 'https://github.com/mblumtritt/tcp-client/issues'
+  }
   spec.rubyforge_project = spec.name
 
   spec.add_development_dependency 'bundler'
