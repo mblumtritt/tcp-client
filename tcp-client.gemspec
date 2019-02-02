@@ -14,7 +14,7 @@ GemSpec = Gem::Specification.new do |spec|
     limits for each method (`connect`, `read`, `write`).
   DESCRIPTION
   spec.author = 'Mike Blumtritt'
-  spec.email = 'mike.blumtritt@invision.de'
+  spec.email = 'mike.blumtritt@pm.me'
   spec.homepage = 'https://github.com/mblumtritt/tcp-client'
   spec.metadata = {
     'issue_tracker' => 'https://github.com/mblumtritt/tcp-client/issues'
