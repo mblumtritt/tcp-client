@@ -96,5 +96,5 @@ module IOTimeoutMixin
     end
   end
 
-  private_constant :DeadlineMethods, :DeadlineIO
+  private_constant(:DeadlineMethods, :DeadlineIO)
 end

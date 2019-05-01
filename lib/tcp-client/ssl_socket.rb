@@ -42,5 +42,5 @@ class TCPClient
     end
   end
 
-  private_constant :SSLSocket
+  private_constant(:SSLSocket)
 end

@@ -33,5 +33,5 @@ class TCPClient
     end
   end
 
-  private_constant :TCPSocket
+  private_constant(:TCPSocket)
 end
