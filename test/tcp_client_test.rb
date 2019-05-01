@@ -43,6 +43,7 @@ class TCPClientTest < Test
   def with_dummy_server(port)
     # this server will never receive or send any data
     server = TCPServer.new('localhost', port)
+    yield
   ensure
     server&.close
   end
