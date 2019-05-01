@@ -17,7 +17,8 @@ GemSpec = Gem::Specification.new do |spec|
   spec.email = 'mike.blumtritt@pm.me'
   spec.homepage = 'https://github.com/mblumtritt/tcp-client'
   spec.metadata = {
-    'issue_tracker' => 'https://github.com/mblumtritt/tcp-client/issues'
+    'source_code_uri' => 'https://github.com/mblumtritt/tcp-client',
+    'bug_tracker_uri' => 'https://github.com/mblumtritt/tcp-client/issues'
   }
   spec.rubyforge_project = spec.name
 
