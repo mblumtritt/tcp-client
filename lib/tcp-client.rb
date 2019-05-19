@@ -14,8 +14,8 @@ class TCPClient
   end
 
   class NotConnected < SocketError
-    def self.raise!(which)
-      raise(self, "client not connected - #{which}", caller(1))
+    def self.raise!(reason)
+      raise(self, "client not connected - #{reason}", caller(1))
     end
   end
 
