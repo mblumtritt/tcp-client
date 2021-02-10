@@ -1,6 +1,8 @@
 require_relative 'test_helper'
 
-class TCPClientTest < Test
+class TCPClientTest < MiniTest::Test
+  parallelize_me!
+
   attr_reader :config
 
   def setup
@@ -83,7 +85,6 @@ class TCPClientTest < Test
         # send 1MB to avoid any TCP stack buffering
         args = Array.new(2024, '?' * 1024)
         subject.write(*args, timeout: timeout)
-        p Time.now - start_time
       end
       assert_in_delta(timeout, Time.now - start_time, 0.02)
     end
@@ -91,6 +92,7 @@ class TCPClientTest < Test
 
   def test_write_timeout
     check_write_timeout(0.1)
+    check_write_timeout(0.25)
   end
 
   def check_connect_timeout(ssl_config)
@@ -103,11 +105,15 @@ class TCPClientTest < Test
   end
 
   def test_connect_ssl_timeout
-    ssl_config = TCPClient::Configuration.new
-    ssl_config.ssl = true
-    [0.5, 1, 1.5].each do |timeout|
-      ssl_config.connect_timeout = timeout
-      check_connect_timeout(ssl_config)
-    end
+    ssl_config = TCPClient::Configuration.new(ssl: true)
+
+    ssl_config.connect_timeout = 0.5
+    check_connect_timeout(ssl_config)
+
+    ssl_config.connect_timeout = 1
+    check_connect_timeout(ssl_config)
+
+    ssl_config.connect_timeout = 1.5
+    check_connect_timeout(ssl_config)
   end
 end

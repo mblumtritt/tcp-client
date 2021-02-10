@@ -1,6 +1,8 @@
 require_relative '../test_helper'
 
-class ConfigurationTest < Test
+class ConfigurationTest < MiniTest::Test
+  parallelize_me!
+
   def test_defaults
     subject = TCPClient::Configuration.new
     assert(subject.buffered)

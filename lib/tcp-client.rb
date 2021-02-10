@@ -4,6 +4,7 @@ require_relative 'tcp-client/address'
 require_relative 'tcp-client/tcp_socket'
 require_relative 'tcp-client/ssl_socket'
 require_relative 'tcp-client/configuration'
+require_relative 'tcp-client/default_configuration'
 require_relative 'tcp-client/version'
 
 class TCPClient
@@ -20,13 +21,14 @@ class TCPClient
   end
 
   TimeoutError = Class.new(IOError)
-  Timeout = TimeoutError # backward compatibility
-  deprecate_constant(:Timeout)
   ConnectTimeoutError = Class.new(TimeoutError)
   ReadTimeoutError = Class.new(TimeoutError)
   WriteTimeoutError = Class.new(TimeoutError)
 
-  def self.open(addr, configuration = Configuration.new)
+  Timeout = TimeoutError # backward compatibility
+  deprecate_constant(:Timeout)
+
+  def self.open(addr, configuration = Configuration.default)
     addr = Address.new(addr)
     client = new
     client.connect(addr, configuration)

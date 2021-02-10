@@ -1,6 +1,8 @@
 require_relative '../test_helper'
 
-class AddressTest < Test
+class AddressTest < MiniTest::Test
+  parallelize_me!
+
   def test_create_from_integer
     subject = TCPClient::Address.new(42)
     assert_equal('localhost:42', subject.to_s)
