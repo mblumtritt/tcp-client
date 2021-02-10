@@ -23,9 +23,9 @@ module IOTimeoutMixin
 
   def write(*msgs, timeout: nil, exception: IOTimeoutError)
     timeout = timeout.to_f
-    return write_all(msgs.join){ |junk| super(junk) } if timeout <= 0
+    return write_all(msgs.join.b){ |junk| super(junk) } if timeout <= 0
     deadline = Time.now + timeout
-    write_all(msgs.join) do |junk|
+    write_all(msgs.join.b) do |junk|
       with_deadline(deadline, exception) do
         write_nonblock(junk, exception: false)
       end
