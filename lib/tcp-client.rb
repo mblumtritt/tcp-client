@@ -19,7 +19,12 @@ class TCPClient
     end
   end
 
-  Timeout = Class.new(IOError)
+  TimeoutError = Class.new(IOError)
+  Timeout = TimeoutError # backward compatibility
+  deprecate_constant(:Timeout)
+  ConnectTimeoutError = Class.new(TimeoutError)
+  ReadTimeoutError = Class.new(TimeoutError)
+  WriteTimeoutError = Class.new(TimeoutError)
 
   def self.open(addr, configuration = Configuration.new)
     addr = Address.new(addr)
@@ -44,9 +49,9 @@ class TCPClient
     close
     NoOpenSSL.raise! if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(addr)
-    @socket = TCPSocket.new(@address, configuration, Timeout)
+    @socket = TCPSocket.new(@address, configuration, ConnectTimeoutError)
     configuration.ssl? && @socket = SSLSocket.new(
-      @socket, @address, configuration, Timeout
+      @socket, @address, configuration, ConnectTimeoutError
     )
     @write_timeout = configuration.write_timeout
     @read_timeout = configuration.read_timeout
@@ -67,12 +72,12 @@ class TCPClient
 
   def read(nbytes, timeout: @read_timeout)
     NotConnected.raise!(self) if closed?
-    @socket.read(nbytes, timeout: timeout, exception: Timeout)
+    @socket.read(nbytes, timeout: timeout, exception: ReadTimeoutError)
   end
 
   def write(*msg, timeout: @write_timeout)
     NotConnected.raise!(self) if closed?
-    @socket.write(*msg, timeout: timeout, exception: Timeout)
+    @socket.write(*msg, timeout: timeout, exception: WriteTimeoutError)
   end
 
   def flush
