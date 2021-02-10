@@ -1,10 +1,11 @@
 require_relative '../lib/tcp-client'
 
-configuration = TCPClient::Configuration.create do |cfg|
-  cfg.connect_timeout = 0.5 # seconds to connect the server
-  cfg.write_timeout = 0.25 # seconds to write a single data junk
-  cfg.read_timeout = 0.5 # seconds to read some bytes
-end
+configuration =
+  TCPClient::Configuration.create do |cfg|
+    cfg.connect_timeout = 0.5 # seconds to connect the server
+    cfg.write_timeout = 0.25 # seconds to write a single data junk
+    cfg.read_timeout = 0.5 # seconds to read some bytes
+  end
 
 # the following request sequence is not allowed to last longer than 1.25 seconds:
 # 0.5 seconds to connect

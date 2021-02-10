@@ -1,11 +1,12 @@
 require_relative '../lib/tcp-client'
 
-configuration = TCPClient::Configuration.create do |cfg|
-  cfg.connect_timeout = 1 # second to connect the server
-  cfg.write_timeout = 0.25 # seconds to write a single data junk
-  cfg.read_timeout = 0.5 # seconds to read some bytes
-  cfg.ssl_params = {ssl_version: :TLSv1_2} # use TLS 1.2
-end
+configuration =
+  TCPClient::Configuration.create do |cfg|
+    cfg.connect_timeout = 1 # second to connect the server
+    cfg.write_timeout = 0.25 # seconds to write a single data junk
+    cfg.read_timeout = 0.5 # seconds to read some bytes
+    cfg.ssl_params = { ssl_version: :TLSv1_2 } # use TLS 1.2
+  end
 
 # the following request sequence is not allowed to last longer than 2 seconds:
 # 1 second to connect (incl. SSL handshake etc.)

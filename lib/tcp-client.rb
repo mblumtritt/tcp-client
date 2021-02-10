@@ -50,9 +50,9 @@ class TCPClient
     NoOpenSSL.raise! if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(addr)
     @socket = TCPSocket.new(@address, configuration, ConnectTimeoutError)
-    configuration.ssl? && @socket = SSLSocket.new(
-      @socket, @address, configuration, ConnectTimeoutError
-    )
+    configuration.ssl? &&
+      @socket =
+        SSLSocket.new(@socket, @address, configuration, ConnectTimeoutError)
     @write_timeout = configuration.write_timeout
     @read_timeout = configuration.read_timeout
     self

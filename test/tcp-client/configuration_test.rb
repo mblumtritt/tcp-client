@@ -49,9 +49,10 @@ class ConfigurationTest < Test
   end
 
   def test_invalid_option
-    err = assert_raises(ArgumentError) do
-      TCPClient::Configuration.new(unknown_attr: :argument)
-    end
+    err =
+      assert_raises(ArgumentError) do
+        TCPClient::Configuration.new(unknown_attr: :argument)
+      end
     assert_includes(err.message, 'attribute')
     assert_includes(err.message, 'unknown_attr')
   end

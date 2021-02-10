@@ -10,4 +10,4 @@ end
 
 # this pseudo-server never reads or writes anything
 DummyServer = TCPServer.new('localhost', 1234)
-Minitest.after_run{ DummyServer.close }
+Minitest.after_run { DummyServer.close }

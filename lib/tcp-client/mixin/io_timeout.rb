@@ -12,7 +12,7 @@ module IOTimeoutMixin
 
   def read(nbytes, timeout: nil, exception: IOTimeoutError)
     timeout = timeout.to_f
-    return read_all(nbytes){ |junk_size| super(junk_size) } if timeout <= 0
+    return read_all(nbytes) { |junk_size| super(junk_size) } if timeout <= 0
     deadline = Time.now + timeout
     read_all(nbytes) do |junk_size|
       with_deadline(deadline, exception) do
@@ -23,7 +23,7 @@ module IOTimeoutMixin
 
   def write(*msgs, timeout: nil, exception: IOTimeoutError)
     timeout = timeout.to_f
-    return write_all(msgs.join.b){ |junk| super(junk) } if timeout <= 0
+    return write_all(msgs.join.b) { |junk| super(junk) } if timeout <= 0
     deadline = Time.now + timeout
     write_all(msgs.join.b) do |junk|
       with_deadline(deadline, exception) do
