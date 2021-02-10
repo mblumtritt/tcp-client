@@ -1,7 +1,7 @@
 class TCPClient
   class Configuration
-    def self.create
-      ret = new
+    def self.create(options = {})
+      ret = new(options)
       yield(ret) if block_given?
       ret
     end
@@ -9,9 +9,10 @@ class TCPClient
     attr_reader :buffered, :keep_alive, :reverse_lookup
     attr_accessor :ssl_params
 
-    def initialize
+    def initialize(options = {})
       @buffered = @keep_alive = @reverse_lookup = true
       self.timeout = @ssl_params = nil
+      options.each_pair(&method(:set))
     end
 
     def ssl?
@@ -66,6 +67,12 @@ class TCPClient
     end
 
     private
+
+    def set(attribute, value)
+      public_send("#{attribute}=", value)
+    rescue NoMethodError
+      raise(ArgumentError, "unknown attribute - #{attribute}")
+    end
 
     def seconds(value)
       value&.positive? ? value : nil
