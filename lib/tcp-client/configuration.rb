@@ -12,7 +12,7 @@ class TCPClient
     def initialize(options = {})
       @buffered = @keep_alive = @reverse_lookup = true
       self.timeout = @ssl_params = nil
-      options.each_pair(&method(:set))
+      options.each_pair { |attribute, value| set(attribute, value) }
     end
 
     def ssl?
