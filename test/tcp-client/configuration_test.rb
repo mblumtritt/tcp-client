@@ -87,4 +87,12 @@ class ConfigurationTest < MiniTest::Test
     assert_same(42, subject.read_timeout)
     assert_same(42, subject.write_timeout)
   end
+
+  def test_compare
+    a = TCPClient::Configuration.new
+    b = TCPClient::Configuration.new
+    assert_equal(a, b)
+    assert(a == b)
+    assert(a === b)
+  end
 end

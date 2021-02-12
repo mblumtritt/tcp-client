@@ -6,7 +6,7 @@ class TCPClient
       ret
     end
 
-    attr_reader :buffered, :keep_alive, :reverse_lookup
+    attr_reader :buffered, :keep_alive, :reverse_lookup, :timeout
     attr_accessor :ssl_params
 
     def initialize(options = {})
@@ -64,6 +64,28 @@ class TCPClient
 
     def read_timeout=(seconds)
       @read_timeout = seconds(seconds)
+    end
+
+    def to_h
+      {
+        buffered: @buffered,
+        keep_alive: @keep_alive,
+        reverse_lookup: @reverse_lookup,
+        timeout: @timeout,
+        connect_timeout: @connect_timeout,
+        read_timeout: @read_timeout,
+        write_timeout: @write_timeout,
+        ssl_params: @ssl_params
+      }
+    end
+
+    def ==(other)
+      to_h == other.to_h
+    end
+    alias eql? ==
+
+    def equal?(other)
+      self.class == other.class && self == other
     end
 
     private
