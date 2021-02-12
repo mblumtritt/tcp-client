@@ -59,9 +59,7 @@ module IOTimeoutMixin
   end
 
   module DeadlineMethods
-    private
-
-    def with_deadline(deadline, exclass)
+    private def with_deadline(deadline, exclass)
       loop do
         case ret = yield
         when :wait_writable
@@ -78,9 +76,7 @@ module IOTimeoutMixin
   end
 
   module DeadlineIO
-    private
-
-    def with_deadline(deadline, exclass)
+    private def with_deadline(deadline, exclass)
       loop do
         case ret = yield
         when :wait_writable

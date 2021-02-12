@@ -22,9 +22,9 @@ class TCPClientTest < MiniTest::Test
   def create_nonconnected_client
     client = TCPClient.new
     client.connect('', config)
+    client
   rescue Errno::EADDRNOTAVAIL
-  ensure
-    return client
+    client
   end
 
   def test_failed_state

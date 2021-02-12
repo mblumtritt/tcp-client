@@ -4,7 +4,7 @@ require 'rake/clean'
 require 'rake/testtask'
 require 'bundler/gem_tasks'
 
-STDOUT.sync = STDERR.sync = true
+$stdout.sync = $stderr.sync = true
 
 CLOBBER << 'prj'
 

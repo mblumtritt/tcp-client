@@ -19,22 +19,22 @@ class TCPClient
       @ssl_params ? true : false
     end
 
-    def ssl=(yn)
-      return @ssl_params = nil unless yn
-      return @ssl_params = yn if Hash === yn
+    def ssl=(value)
+      return @ssl_params = nil unless value
+      return @ssl_params = value.dup if Hash === value
       @ssl_params ||= {}
     end
 
-    def buffered=(yn)
-      @buffered = yn ? true : false
+    def buffered=(value)
+      @buffered = value ? true : false
     end
 
-    def keep_alive=(yn)
-      @keep_alive = yn ? true : false
+    def keep_alive=(value)
+      @keep_alive = value ? true : false
     end
 
-    def reverse_lookup=(yn)
-      @reverse_lookup = yn ? true : false
+    def reverse_lookup=(value)
+      @reverse_lookup = value ? true : false
     end
 
     def timeout=(seconds)

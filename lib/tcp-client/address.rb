@@ -44,7 +44,7 @@ class TCPClient
     end
 
     def from_string(str)
-      return nil, str.to_i unless idx = str.rindex(':')
+      idx = str.rindex(':') or return nil, str.to_i
       name = str[0, idx]
       name = name[1, name.size - 2] if name[0] == '[' && name[-1] == ']'
       [name, str[idx + 1, str.size - idx].to_i]

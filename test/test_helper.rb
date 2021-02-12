@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require 'minitest/parallel'
 require_relative '../lib/tcp-client'
