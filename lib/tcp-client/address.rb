@@ -25,6 +25,19 @@ class TCPClient
       "#{@hostname}:#{@addrinfo.ip_port}"
     end
 
+    def to_h
+      {host: @hostname, port: @addrinfo.ip_port}
+    end
+
+    def ==(other)
+      to_h == other.to_h
+    end
+    alias eql? ==
+
+    def equal?(other)
+      self.class == other.class && self == other
+    end
+
     private
 
     def init_from_selfclass(address)

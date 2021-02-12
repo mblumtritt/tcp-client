@@ -54,4 +54,13 @@ class AddressTest < MiniTest::Test
     assert(subject.addrinfo.ip?)
     assert(subject.addrinfo.ipv6?)
   end
+
+  def test_compare
+    a = TCPClient::Address.new('localhost:42')
+    b = TCPClient::Address.new('localhost:42')
+    assert_equal(a, b)
+    assert(a == b)
+    assert(a === b)
+  end
+
 end
