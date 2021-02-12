@@ -41,7 +41,7 @@ class TCPClientTest < MiniTest::Test
   end
 
   def test_connected_state
-    TCPClient.open('localhost:1234') do |subject|
+    TCPClient.open('localhost:1234', config) do |subject|
       refute(subject.closed?)
       assert_equal('localhost:1234', subject.to_s)
       refute_nil(subject.address)
