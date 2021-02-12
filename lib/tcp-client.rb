@@ -78,7 +78,7 @@ class TCPClient
     raise('no block given') unless block_given?
     raise('deadline already used') if @deadline
     tm = timeout&.to_f
-    raise(ArgumentError, "invalid deadline - #{timeout}") unless tm.positive?
+    raise(ArgumentError, "invalid deadline - #{timeout}") unless tm&.positive?
     @deadline = Time.now + tm
     yield(self)
   ensure
