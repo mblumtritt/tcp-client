@@ -3,6 +3,8 @@ require_relative 'test_helper'
 class TCPClientTest < MiniTest::Test
   parallelize_me!
 
+  HUGE_AMOUNT_OF_DATA = Array.new(2024, '?' * 1024).freeze
+
   attr_reader :config
 
   def setup
@@ -65,7 +67,7 @@ class TCPClientTest < MiniTest::Test
         start_time = Time.now
         subject.read(42, timeout: timeout)
       end
-      assert_in_delta(timeout, Time.now - start_time, 0.02)
+      assert_in_delta(timeout, Time.now - start_time, 0.11)
     end
   end
 
@@ -81,18 +83,54 @@ class TCPClientTest < MiniTest::Test
       start_time = nil
       assert_raises(TCPClient::WriteTimeoutError) do
         start_time = Time.now
-
-        # send 1MB to avoid any TCP stack buffering
-        args = Array.new(2024, '?' * 1024)
-        subject.write(*args, timeout: timeout)
+        subject.write(*HUGE_AMOUNT_OF_DATA, timeout: timeout)
       end
       assert_in_delta(timeout, Time.now - start_time, 0.02)
     end
   end
 
   def test_write_timeout
-    check_write_timeout(0.1)
+    check_write_timeout(0.01)
     check_write_timeout(0.25)
+  end
+
+  def test_write_deadline
+    TCPClient.open('localhost:1234', config) do |subject|
+      refute(subject.closed?)
+      assert_raises(TCPClient::WriteTimeoutError) do
+        subject.with_deadline(0.25) do |*args|
+          assert_equal([subject], args)
+          loop { subject.write('some data here') }
+        end
+      end
+    end
+  end
+
+  def test_read_deadline
+    TCPClient.open('localhost:1234', config) do |subject|
+      refute(subject.closed?)
+      assert_raises(TCPClient::ReadTimeoutError) do
+        subject.with_deadline(0.25) do |*args|
+          assert_equal([subject], args)
+          loop { subject.read(0) }
+        end
+      end
+    end
+  end
+
+  def test_read_write_deadline
+    TCPClient.open('localhost:1234', config) do |subject|
+      refute(subject.closed?)
+      assert_raises(TCPClient::TimeoutError) do
+        subject.with_deadline(0.25) do |*args|
+          assert_equal([subject], args)
+          loop do
+            subject.write('HUGE_AMOUNT_OF_DATA')
+            subject.read(0)
+          end
+        end
+      end
+    end
   end
 
   def check_connect_timeout(ssl_config)
@@ -101,7 +139,7 @@ class TCPClientTest < MiniTest::Test
       start_time = Time.now
       TCPClient.new.connect('localhost:1234', ssl_config)
     end
-    assert_in_delta(ssl_config.connect_timeout, Time.now - start_time, 0.02)
+    assert_in_delta(ssl_config.connect_timeout, Time.now - start_time, 0.11)
   end
 
   def test_connect_ssl_timeout

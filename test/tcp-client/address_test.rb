@@ -62,5 +62,4 @@ class AddressTest < MiniTest::Test
     assert(a == b)
     assert(a === b)
   end
-
 end

@@ -26,7 +26,7 @@ class TCPClient
     end
 
     def to_h
-      {host: @hostname, port: @addrinfo.ip_port}
+      { host: @hostname, port: @addrinfo.ip_port }
     end
 
     def ==(other)

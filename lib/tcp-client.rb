@@ -41,20 +41,20 @@ class TCPClient
 
   def initialize
     @socket = @address = @write_timeout = @read_timeout = nil
+    @deadline = nil
   end
 
   def to_s
     @address ? @address.to_s : ''
   end
 
-  def connect(addr, configuration)
+  def connect(addr, configuration, exception: ConnectTimeoutError)
     close
     NoOpenSSL.raise! if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(addr)
-    @socket = TCPSocket.new(@address, configuration, ConnectTimeoutError)
+    @socket = TCPSocket.new(@address, configuration, exception)
     configuration.ssl? &&
-      @socket =
-        SSLSocket.new(@socket, @address, configuration, ConnectTimeoutError)
+      @socket = SSLSocket.new(@socket, @address, configuration, exception)
     @write_timeout = configuration.write_timeout
     @read_timeout = configuration.read_timeout
     self
@@ -66,24 +66,47 @@ class TCPClient
     self
   rescue IOError
     self
+  ensure
+    @deadline = nil
   end
 
   def closed?
     @socket.nil? || @socket.closed?
   end
 
-  def read(nbytes, timeout: @read_timeout)
-    NotConnected.raise!(self) if closed?
-    @socket.read(nbytes, timeout: timeout, exception: ReadTimeoutError)
+  def with_deadline(timeout)
+    raise('no block given') unless block_given?
+    raise('deadline already used') if @deadline
+    tm = timeout&.to_f
+    raise(ArgumentError, "invalid deadline - #{timeout}") unless tm.positive?
+    @deadline = Time.now + tm
+    yield(self)
+  ensure
+    @deadline = nil
   end
 
-  def write(*msg, timeout: @write_timeout)
+  def read(nbytes, timeout: nil, exception: ReadTimeoutError)
     NotConnected.raise!(self) if closed?
-    @socket.write(*msg, timeout: timeout, exception: WriteTimeoutError)
+    time = timeout || remaining_time(exception) || @read_timeout
+    @socket.read(nbytes, timeout: time, exception: exception)
+  end
+
+  def write(*msg, timeout: nil, exception: WriteTimeoutError)
+    NotConnected.raise!(self) if closed?
+    time = timeout || remaining_time(exception) || @write_timeout
+    @socket.write(*msg, timeout: time, exception: exception)
   end
 
   def flush
     @socket.flush unless closed?
     self
+  end
+
+  private
+
+  def remaining_time(exception)
+    return unless @deadline
+    remaining_time = @deadline - Time.now
+    0 < remaining_time ? remaining_time : raise(exception)
   end
 end
