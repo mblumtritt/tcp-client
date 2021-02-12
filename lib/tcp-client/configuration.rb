@@ -75,7 +75,7 @@ class TCPClient
     end
 
     def seconds(value)
-      value&.positive? ? value : nil
+      value&.to_f&.positive? ? value : nil
     end
   end
 end
