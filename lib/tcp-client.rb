@@ -29,9 +29,8 @@ class TCPClient
   deprecate_constant(:Timeout)
 
   def self.open(addr, configuration = Configuration.default)
-    addr = Address.new(addr)
     client = new
-    client.connect(addr, configuration)
+    client.connect(Address.new(addr), configuration)
     block_given? ? yield(client) : client
   ensure
     client&.close if block_given?
@@ -40,8 +39,7 @@ class TCPClient
   attr_reader :address
 
   def initialize
-    @socket = @address = @write_timeout = @read_timeout = nil
-    @deadline = nil
+    @socket = @address = @write_timeout = @read_timeout = @deadline = nil
   end
 
   def to_s
@@ -61,13 +59,12 @@ class TCPClient
   end
 
   def close
-    socket, @socket = @socket, nil
-    socket&.close
+    @socket&.close
     self
   rescue IOError
     self
   ensure
-    @deadline = nil
+    @socket = @deadline = nil
   end
 
   def closed?
@@ -87,26 +84,32 @@ class TCPClient
 
   def read(nbytes, timeout: nil, exception: ReadTimeoutError)
     NotConnected.raise!(self) if closed?
-    time = timeout || remaining_time(exception) || @read_timeout
-    @socket.read(nbytes, timeout: time, exception: exception)
+    if timeout.nil? && @deadline
+      return @socket.read_with_deadline(nbytes, @deadline, exception)
+    end
+    timeout = (timeout || @read_timeout).to_f
+    if timeout.positive?
+      @socket.read_with_deadline(nbytes, Time.now + timeout, exception)
+    else
+      @socket.read(nbytes)
+    end
   end
 
   def write(*msg, timeout: nil, exception: WriteTimeoutError)
     NotConnected.raise!(self) if closed?
-    time = timeout || remaining_time(exception) || @write_timeout
-    @socket.write(*msg, timeout: time, exception: exception)
+    if timeout.nil? && @deadline
+      return @socket.write_with_deadline(msg.join.b, @deadline, exception)
+    end
+    timeout = (timeout || @read_timeout).to_f
+    if timeout.positive?
+      @socket.write_with_deadline(msg.join.b, Time.now + timeout, exception)
+    else
+      @socket.write(*msg)
+    end
   end
 
   def flush
     @socket.flush unless closed?
     self
-  end
-
-  private
-
-  def remaining_time(exception)
-    return unless @deadline
-    remaining_time = @deadline - Time.now
-    0 < remaining_time ? remaining_time : raise(exception)
   end
 end

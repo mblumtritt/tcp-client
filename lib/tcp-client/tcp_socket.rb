@@ -1,9 +1,9 @@
 require 'socket'
-require_relative 'mixin/io_timeout'
+require_relative 'mixin/io_with_deadline'
 
 class TCPClient
   class TCPSocket < ::Socket
-    include IOTimeoutMixin
+    include IOWithDeadlineMixin
 
     def initialize(address, configuration, exception)
       super(address.addrinfo.ipv6? ? :INET6 : :INET, :STREAM)
@@ -19,7 +19,8 @@ class TCPClient
           address.addrinfo.ip_port,
           address.addrinfo.ip_address
         )
-      return connect(addr) unless timeout
+      timeout = timeout.to_f
+      return connect(addr) if timeout.zero?
       with_deadline(Time.now + timeout, exception) do
         connect_nonblock(addr, exception: false)
       end

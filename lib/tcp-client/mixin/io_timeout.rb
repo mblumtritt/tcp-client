@@ -1,3 +1,7 @@
+# I keep this file for backward compatibility.
+# This may be removed in one of the next versions.
+# Let me know if you like to use it elsewhere...
+
 IOTimeoutError = Class.new(IOError) unless defined?(IOTimeoutError)
 
 module IOTimeoutMixin
@@ -7,6 +11,24 @@ module IOTimeoutMixin
       mod.include(DeadlineMethods)
     else
       mod.include(DeadlineIO)
+    end
+  end
+
+  def read_with_deadline(nbytes, deadline, exception)
+    result = ''.b
+    return result if nbytes.zero?
+    loop do
+      junk_size = nbytes - result.bytesize
+      read =
+        with_deadline(deadline, exception) do
+          read_nonblock(junk_size, exception: false)
+        end
+      unless read
+        close
+        return result
+      end
+      result += read
+      return result if result.bytesize >= nbytes
     end
   end
 
@@ -35,8 +57,8 @@ module IOTimeoutMixin
   private
 
   def read_all(nbytes)
-    return '' if nbytes.zero?
-    result = ''
+    return ''.b if nbytes.zero?
+    result = ''.b
     loop do
       unless read = yield(nbytes - result.bytesize)
         close
