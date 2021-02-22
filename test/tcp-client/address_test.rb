@@ -13,7 +13,7 @@ class AddressTest < MiniTest::Test
   end
 
   def test_create_from_addrinfo
-    addrinfo = Addrinfo.tcp('google.com', 42)
+    addrinfo = Addrinfo.tcp('localhost', 42)
     subject = TCPClient::Address.new(addrinfo)
     assert_equal(addrinfo.getnameinfo[0], subject.hostname)
     assert_equal(addrinfo, subject.addrinfo)

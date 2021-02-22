@@ -4,11 +4,11 @@ rescue LoadError
   return
 end
 
-require_relative 'mixin/io_timeout'
+require_relative 'mixin/io_with_deadline'
 
 class TCPClient
   class SSLSocket < ::OpenSSL::SSL::SSLSocket
-    include IOTimeoutMixin
+    include IOWithDeadlineMixin
 
     def initialize(socket, address, configuration, exception)
       ssl_params = Hash[configuration.ssl_params]
@@ -31,12 +31,13 @@ class TCPClient
 
     def connect_to(address, check, timeout, exception)
       self.hostname = address.hostname
-      if timeout
+      timeout = timeout.to_f
+      if timeout.zero?
+        connect
+      else
         with_deadline(Time.now + timeout, exception) do
           connect_nonblock(exception: false)
         end
-      else
-        connect
       end
       post_connection_check(address.hostname) if check
     end
