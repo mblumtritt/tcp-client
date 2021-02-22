@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'tcp-client/errors'
 require_relative 'tcp-client/address'
 require_relative 'tcp-client/tcp_socket'
 require_relative 'tcp-client/ssl_socket'
@@ -8,26 +9,6 @@ require_relative 'tcp-client/default_configuration'
 require_relative 'tcp-client/version'
 
 class TCPClient
-  class NoOpenSSL < RuntimeError
-    def self.raise!
-      raise(self, 'OpenSSL is not avail', caller(1))
-    end
-  end
-
-  class NotConnected < SocketError
-    def self.raise!(reason)
-      raise(self, "client not connected - #{reason}", caller(1))
-    end
-  end
-
-  TimeoutError = Class.new(IOError)
-  ConnectTimeoutError = Class.new(TimeoutError)
-  ReadTimeoutError = Class.new(TimeoutError)
-  WriteTimeoutError = Class.new(TimeoutError)
-
-  Timeout = TimeoutError # backward compatibility
-  deprecate_constant(:Timeout)
-
   def self.open(addr, configuration = Configuration.default)
     client = new
     client.connect(Address.new(addr), configuration)
@@ -72,18 +53,18 @@ class TCPClient
   end
 
   def with_deadline(timeout)
-    raise('no block given') unless block_given?
-    raise('deadline already used') if @deadline
+    NoBlockGiven.raise! unless block_given?
+    previous_deadline = @deadline
     tm = timeout&.to_f
-    raise(ArgumentError, "invalid deadline - #{timeout}") unless tm&.positive?
+    InvalidDeadLine.raise! unless tm&.positive?
     @deadline = Time.now + tm
     yield(self)
   ensure
-    @deadline = nil
+    @deadline = previous_deadline
   end
 
   def read(nbytes, timeout: nil, exception: ReadTimeoutError)
-    NotConnected.raise!(self) if closed?
+    NotConnected.raise! if closed?
     if timeout.nil? && @deadline
       return @socket.read_with_deadline(nbytes, @deadline, exception)
     end
@@ -96,7 +77,7 @@ class TCPClient
   end
 
   def write(*msg, timeout: nil, exception: WriteTimeoutError)
-    NotConnected.raise!(self) if closed?
+    NotConnected.raise! if closed?
     if timeout.nil? && @deadline
       return @socket.write_with_deadline(msg.join.b, @deadline, exception)
     end
