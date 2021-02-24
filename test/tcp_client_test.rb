@@ -67,7 +67,7 @@ class TCPClientTest < MiniTest::Test
         start_time = Time.now
         subject.read(42, timeout: timeout)
       end
-      assert_in_delta(timeout, Time.now - start_time, 0.11)
+      assert_in_delta(timeout, Time.now - start_time, 0.15)
     end
   end
 
@@ -85,7 +85,7 @@ class TCPClientTest < MiniTest::Test
         start_time = Time.now
         subject.write(*HUGE_AMOUNT_OF_DATA, timeout: timeout)
       end
-      assert_in_delta(timeout, Time.now - start_time, 0.11)
+      assert_in_delta(timeout, Time.now - start_time, 0.15)
     end
   end
 

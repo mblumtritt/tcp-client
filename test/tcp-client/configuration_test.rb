@@ -39,7 +39,8 @@ class ConfigurationTest < MiniTest::Test
         connect_timeout: 1,
         read_timeout: 2,
         write_timeout: 3,
-        ssl: true
+        ssl: true,
+        connect_timeout_error: IOError
       )
     refute(subject.buffered)
     refute(subject.keep_alive)
@@ -48,6 +49,8 @@ class ConfigurationTest < MiniTest::Test
     assert_same(2, subject.read_timeout)
     assert_same(3, subject.write_timeout)
     assert(subject.ssl?)
+    assert_same(IOError, subject.connect_timeout_error)
+    assert_same(TCPClient::ReadTimeoutError, subject.read_timeout_error)
   end
 
   def test_invalid_option
@@ -88,11 +91,51 @@ class ConfigurationTest < MiniTest::Test
     assert_same(42, subject.write_timeout)
   end
 
+  def test_timeout_error_overwrite
+    subject = TCPClient::Configuration.new
+    assert_same(TCPClient::ConnectTimeoutError, subject.connect_timeout_error)
+    assert_same(TCPClient::ReadTimeoutError, subject.read_timeout_error)
+    assert_same(TCPClient::WriteTimeoutError, subject.write_timeout_error)
+
+    subject.timeout_error = IOError
+    assert_same(IOError, subject.connect_timeout_error)
+    assert_same(IOError, subject.read_timeout_error)
+    assert_same(IOError, subject.write_timeout_error)
+  end
+
   def test_compare
     a = TCPClient::Configuration.new
     b = TCPClient::Configuration.new
     assert_equal(a, b)
     assert(a == b)
     assert(a === b)
+  end
+
+  def test_dup
+    source =
+      TCPClient::Configuration.new(
+        buffered: false,
+        keep_alive: false,
+        reverse_lookup: false,
+        connect_timeout: 1,
+        read_timeout: 2,
+        write_timeout: 3,
+        ssl: {
+          ssl_version: :TLSv1_2
+        }
+      )
+    shadow = source.dup.freeze
+
+    # some changes
+    source.buffered = true
+    source.write_timeout = 5
+    source.ssl_params[:err] = true
+    source.timeout_error = IOError
+
+    refute_equal(source.__id__, shadow.__id__)
+    refute(shadow.buffered)
+    assert_equal(3, shadow.write_timeout)
+    assert_equal({ ssl_version: :TLSv1_2 }, shadow.ssl_params)
+    assert_same(TCPClient::ReadTimeoutError, shadow.read_timeout_error)
   end
 end

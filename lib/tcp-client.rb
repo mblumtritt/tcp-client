@@ -20,22 +20,22 @@ class TCPClient
   attr_reader :address
 
   def initialize
-    @socket = @address = @write_timeout = @read_timeout = @deadline = nil
+    @socket = @address = @deadline = @cfg = nil
   end
 
   def to_s
     @address ? @address.to_s : ''
   end
 
-  def connect(addr, configuration, exception: ConnectTimeoutError)
+  def connect(addr, configuration, exception: nil)
     close
     NoOpenSSL.raise! if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(addr)
-    @socket = TCPSocket.new(@address, configuration, exception)
-    configuration.ssl? &&
+    @cfg = configuration.dup
+    exception ||= configuration.connect_timeout_error
+    @socket = TCPSocket.new(@address, @cfg, exception)
+    @cfg.ssl? &&
       @socket = SSLSocket.new(@socket, @address, configuration, exception)
-    @write_timeout = configuration.write_timeout
-    @read_timeout = configuration.read_timeout
     self
   end
 
@@ -53,8 +53,8 @@ class TCPClient
   end
 
   def with_deadline(timeout)
-    NoBlockGiven.raise! unless block_given?
     previous_deadline = @deadline
+    NoBlockGiven.raise! unless block_given?
     tm = timeout&.to_f
     InvalidDeadLine.raise! unless tm&.positive?
     @deadline = Time.now + tm
@@ -63,34 +63,43 @@ class TCPClient
     @deadline = previous_deadline
   end
 
-  def read(nbytes, timeout: nil, exception: ReadTimeoutError)
+  def read(nbytes, timeout: nil, exception: nil)
     NotConnected.raise! if closed?
-    if timeout.nil? && @deadline
-      return @socket.read_with_deadline(nbytes, @deadline, exception)
-    end
-    timeout = (timeout || @read_timeout).to_f
-    if timeout.positive?
-      @socket.read_with_deadline(nbytes, Time.now + timeout, exception)
-    else
-      @socket.read(nbytes)
-    end
+    timeout.nil? && @deadline and
+      return read_with_deadline(nbytes, @deadline, exception)
+    timeout = (timeout || @cfg.read_timeout).to_f
+    return @socket.read(nbytes) unless timeout.positive?
+    read_with_deadline(nbytes, Time.now + timeout, exception)
   end
 
-  def write(*msg, timeout: nil, exception: WriteTimeoutError)
+  def write(*msg, timeout: nil, exception: nil)
     NotConnected.raise! if closed?
-    if timeout.nil? && @deadline
-      return @socket.write_with_deadline(msg.join.b, @deadline, exception)
-    end
-    timeout = (timeout || @read_timeout).to_f
-    if timeout.positive?
-      @socket.write_with_deadline(msg.join.b, Time.now + timeout, exception)
-    else
-      @socket.write(*msg)
-    end
+    timeout.nil? && @deadline and
+      return write_with_deadline(msg, @deadline, exception)
+    timeout = (timeout || @cfg.write_timeout).to_f
+    return @socket.write(*msg) unless timeout.positive?
+    write_with_deadline(msg, Time.now + timeout, exception)
   end
 
   def flush
     @socket.flush unless closed?
     self
+  end
+
+  private
+
+  def read_with_deadline(nbytes, deadline, exception)
+    @socket.read_with_deadline(
+      nbytes,
+      deadline,
+      exception || @cfg.read_timeout_error
+    )
+  end
+
+  def write_with_deadline(msg, deadline, exception)
+    exception ||= @cfg.write_timeout_error
+    msg.each do |chunk|
+      @socket.write_with_deadline(chunk.b, deadline, exception)
+    end
   end
 end

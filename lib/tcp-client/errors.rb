@@ -21,6 +21,18 @@ class TCPClient
     end
   end
 
+  class UnknownAttribute < ArgumentError
+    def self.raise!(attribute)
+      raise(self, "unknown attribute - #{attribute}", caller(1))
+    end
+  end
+
+  class NotAnException < TypeError
+    def self.raise!(object)
+      raise(self, "not a valid exception class - #{object.inspect}", caller(1))
+    end
+  end
+
   class NotConnected < SocketError
     def self.raise!
       raise(self, 'client not connected', caller(1))
