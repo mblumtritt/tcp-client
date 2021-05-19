@@ -6,10 +6,8 @@ class TCPClient
   class << self
     attr_reader :default_configuration
 
-    def configure(options = {})
-      cfg = Configuration.new(options)
-      yield(cfg) if block_given?
-      @default_configuration = cfg
+    def configure(options = {}, &block)
+      @default_configuration = Configuration.create(options, &block)
     end
   end
 
