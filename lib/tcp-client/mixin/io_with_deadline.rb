@@ -55,6 +55,8 @@ module IOWithDeadlineMixin
           return ret
         end
       end
+    rescue Errno::ETIMEDOUT
+      raise(exclass)
     end
   end
 
@@ -72,6 +74,8 @@ module IOWithDeadlineMixin
           return ret
         end
       end
+    rescue Errno::ETIMEDOUT
+      raise(exclass)
     end
   end
 
