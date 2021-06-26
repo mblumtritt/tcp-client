@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'errors'
 
 class TCPClient
@@ -80,23 +82,23 @@ class TCPClient
     end
 
     def timeout_error=(exception)
-      NotAnException.raise!(exception) unless exception_class?(exception)
+      raise(NotAnException, exception) unless exception_class?(exception)
       @connect_timeout_error =
         @read_timeout_error = @write_timeout_error = exception
     end
 
     def connect_timeout_error=(exception)
-      NotAnException.raise!(exception) unless exception_class?(exception)
+      raise(NotAnException, exception) unless exception_class?(exception)
       @connect_timeout_error = exception
     end
 
     def read_timeout_error=(exception)
-      NotAnException.raise!(exception) unless exception_class?(exception)
+      raise(NotAnException, exception) unless exception_class?(exception)
       @read_timeout_error = exception
     end
 
     def write_timeout_error=(exception)
-      NotAnException.raise!(exception) unless exception_class?(exception)
+      raise(NotAnException, exception) unless exception_class?(exception)
       @write_timeout_error = exception
     end
 
@@ -134,7 +136,7 @@ class TCPClient
     def set(attribute, value)
       public_send("#{attribute}=", value)
     rescue NoMethodError
-      UnknownAttribute.raise!(attribute)
+      raise(UnknownAttribute, attribute)
     end
 
     def seconds(value)

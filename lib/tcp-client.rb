@@ -29,7 +29,7 @@ class TCPClient
 
   def connect(addr, configuration, exception: nil)
     close
-    NoOpenSSL.raise! if configuration.ssl? && !defined?(SSLSocket)
+    raise(NoOpenSSL) if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(addr)
     @cfg = configuration.dup
     exception ||= configuration.connect_timeout_error
@@ -54,9 +54,9 @@ class TCPClient
 
   def with_deadline(timeout)
     previous_deadline = @deadline
-    NoBlockGiven.raise! unless block_given?
+    raise(NoBlockGiven) unless block_given?
     tm = timeout&.to_f
-    InvalidDeadLine.raise! unless tm&.positive?
+    raise(InvalidDeadLine) unless tm&.positive?
     @deadline = Time.now + tm
     yield(self)
   ensure
@@ -64,7 +64,7 @@ class TCPClient
   end
 
   def read(nbytes, timeout: nil, exception: nil)
-    NotConnected.raise! if closed?
+    raise(NotConnected) if closed?
     timeout.nil? && @deadline and
       return read_with_deadline(nbytes, @deadline, exception)
     timeout = (timeout || @cfg.read_timeout).to_f
@@ -73,7 +73,7 @@ class TCPClient
   end
 
   def write(*msg, timeout: nil, exception: nil)
-    NotConnected.raise! if closed?
+    raise(NotConnected) if closed?
     timeout.nil? && @deadline and
       return write_with_deadline(msg, @deadline, exception)
     timeout = (timeout || @cfg.write_timeout).to_f
