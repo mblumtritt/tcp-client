@@ -10,10 +10,10 @@ class TCPClient
       case addr
       when self.class
         init_from_selfclass(addr)
-      when Integer
-        init_from_addrinfo(Addrinfo.tcp(nil, addr))
       when Addrinfo
         init_from_addrinfo(addr)
+      when Integer
+        init_from_addrinfo(Addrinfo.tcp(nil, addr))
       else
         init_from_string(addr)
       end
@@ -59,7 +59,9 @@ class TCPClient
     def from_string(str)
       idx = str.rindex(':') or return nil, str.to_i
       name = str[0, idx]
-      name = name[1, name.size - 2] if name[0] == '[' && name[-1] == ']'
+      if name.start_with?('[') && name.end_with?(']')
+        name = name[1, name.size - 2]
+      end
       [name, str[idx + 1, str.size - idx].to_i]
     end
   end

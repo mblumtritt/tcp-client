@@ -24,9 +24,9 @@ class TCPClient
     private
 
     def create_context(ssl_params)
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.set_params(ssl_params)
-      ctx
+      context = OpenSSL::SSL::SSLContext.new
+      context.set_params(ssl_params)
+      context
     end
 
     def connect_to(address, check, timeout, exception)

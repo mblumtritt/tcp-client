@@ -98,10 +98,8 @@ class TCPClient
 
   def write_with_deadline(msg, deadline, exception)
     exception ||= @cfg.write_timeout_error
-    result = 0
-    msg.each do |chunk|
-      result += @socket.write_with_deadline(chunk.b, deadline, exception)
+    msg.sum do |chunk|
+      @socket.write_with_deadline(chunk.b, deadline, exception)
     end
-    result
   end
 end
