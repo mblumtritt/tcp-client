@@ -118,7 +118,7 @@ class TCPClientTest < MiniTest::Test
     end
   end
 
-  def xtest_read_write_deadline
+  def test_read_write_deadline
     TCPClient.open('localhost:1234', config) do |subject|
       refute(subject.closed?)
       assert_raises(TCPClient::TimeoutError) do
@@ -139,7 +139,7 @@ class TCPClientTest < MiniTest::Test
       start_time = Time.now
       TCPClient.new.connect('localhost:1234', ssl_config)
     end
-    assert_in_delta(ssl_config.connect_timeout, Time.now - start_time, 0.11)
+    assert_in_delta(ssl_config.connect_timeout, Time.now - start_time, 0.25)
   end
 
   def test_connect_ssl_timeout
