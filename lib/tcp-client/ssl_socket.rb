@@ -12,6 +12,7 @@ class TCPClient
 
     def initialize(socket, address, configuration, exception)
       ssl_params = Hash[configuration.ssl_params]
+      self.sync_close = true
       super(socket, create_context(ssl_params))
       connect_to(
         address,
