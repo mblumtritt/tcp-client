@@ -11,6 +11,10 @@ class TCPClientTest < MiniTest::Test
     @config = TCPClient::Configuration.create(buffered: false)
   end
 
+  def port
+    PseudoServer.local_address.ip_port
+  end
+
   def test_defaults
     subject = TCPClient.new
     assert(subject.closed?)
@@ -43,15 +47,15 @@ class TCPClientTest < MiniTest::Test
   end
 
   def test_connected_state
-    TCPClient.open('localhost:1234', config) do |subject|
+    TCPClient.open("localhost:#{port}", config) do |subject|
       refute(subject.closed?)
-      assert_equal('localhost:1234', subject.to_s)
+      assert_equal("localhost:#{port}", subject.to_s)
       refute_nil(subject.address)
       address_when_opened = subject.address
-      assert_equal('localhost:1234', subject.address.to_s)
+      assert_equal("localhost:#{port}", subject.address.to_s)
       assert_equal('localhost', subject.address.hostname)
       assert_instance_of(Addrinfo, subject.address.addrinfo)
-      assert_same(1234, subject.address.addrinfo.ip_port)
+      assert_same(port, subject.address.addrinfo.ip_port)
 
       subject.close
       assert(subject.closed?)
@@ -60,7 +64,7 @@ class TCPClientTest < MiniTest::Test
   end
 
   def check_read_timeout(timeout)
-    TCPClient.open('localhost:1234', config) do |subject|
+    TCPClient.open("localhost:#{port}", config) do |subject|
       refute(subject.closed?)
       start_time = nil
       assert_raises(TCPClient::ReadTimeoutError) do
@@ -78,7 +82,7 @@ class TCPClientTest < MiniTest::Test
   end
 
   def check_write_timeout(timeout)
-    TCPClient.open('localhost:1234', config) do |subject|
+    TCPClient.open("localhost:#{port}", config) do |subject|
       refute(subject.closed?)
       start_time = nil
       assert_raises(TCPClient::WriteTimeoutError) do
@@ -95,7 +99,7 @@ class TCPClientTest < MiniTest::Test
   end
 
   def test_write_deadline
-    TCPClient.open('localhost:1234', config) do |subject|
+    TCPClient.open("localhost:#{port}", config) do |subject|
       refute(subject.closed?)
       assert_raises(TCPClient::WriteTimeoutError) do
         subject.with_deadline(0.25) do |*args|
@@ -107,7 +111,7 @@ class TCPClientTest < MiniTest::Test
   end
 
   def test_read_deadline
-    TCPClient.open('localhost:1234', config) do |subject|
+    TCPClient.open("localhost:#{port}", config) do |subject|
       refute(subject.closed?)
       assert_raises(TCPClient::ReadTimeoutError) do
         subject.with_deadline(0.25) do |*args|
@@ -119,7 +123,7 @@ class TCPClientTest < MiniTest::Test
   end
 
   def test_read_write_deadline
-    TCPClient.open('localhost:1234', config) do |subject|
+    TCPClient.open("localhost:#{port}", config) do |subject|
       refute(subject.closed?)
       assert_raises(TCPClient::TimeoutError) do
         subject.with_deadline(0.25) do |*args|
@@ -137,7 +141,7 @@ class TCPClientTest < MiniTest::Test
     start_time = nil
     assert_raises(TCPClient::ConnectTimeoutError) do
       start_time = Time.now
-      TCPClient.new.connect('localhost:1234', ssl_config)
+      TCPClient.new.connect("localhost:#{port}", ssl_config)
     end
     assert_in_delta(ssl_config.connect_timeout, Time.now - start_time, 0.25)
   end
