@@ -6,8 +6,7 @@ TCPClient.configure(
   read_timeout: 0.5 # seconds to read some bytes
 )
 
-# the following request sequence is not allowed
-# to last longer than 1.25 seconds:
+# the following sequence is not allowed to last longer than 1.25 seconds:
 #   0.5 seconds to connect
 # + 0.25 seconds to write data
 # + 0.5 seconds to read a response
