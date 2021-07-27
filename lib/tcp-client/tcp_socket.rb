@@ -1,4 +1,5 @@
 require 'socket'
+require_relative 'deadline'
 require_relative 'mixin/io_with_deadline'
 
 class TCPClient
@@ -21,7 +22,7 @@ class TCPClient
         )
       timeout = timeout.to_f
       return connect(addr) if timeout.zero?
-      with_deadline(Time.now + timeout, exception) do
+      with_deadline(Deadline.new(timeout), exception) do
         connect_nonblock(addr, exception: false)
       end
     end

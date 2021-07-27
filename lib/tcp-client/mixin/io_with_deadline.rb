@@ -9,25 +9,22 @@ module IOWithDeadlineMixin
   end
 
   def read_with_deadline(bytes_to_read, deadline, exception)
-    raise(exception) if Time.now > deadline
+    deadline.remaining?(exception)
     result = ''.b
-    return result if bytes_to_read <= 0
-    loop do
+    while result.bytesize < bytes_to_read
       read =
         with_deadline(deadline, exception) do
           read_nonblock(bytes_to_read - result.bytesize, exception: false)
         end
-      unless read
-        close
-        return result
-      end
-      result += read
-      return result if result.bytesize >= bytes_to_read
+      next result += read if read
+      close
+      break
     end
+    result
   end
 
   def write_with_deadline(data, deadline, exception)
-    raise(exception) if Time.now > deadline
+    deadline.remaining?(exception)
     return 0 if (size = data.bytesize).zero?
     result = 0
     loop do
@@ -46,11 +43,9 @@ module IOWithDeadlineMixin
       loop do
         case ret = yield
         when :wait_writable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
-          raise(exception) if wait_writable(remaining_time).nil?
+          raise(exception) if wait_writable(deadline.remaining(exception)).nil?
         when :wait_readable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
-          raise(exception) if wait_readable(remaining_time).nil?
+          raise(exception) if wait_readable(deadline.remaining(exception)).nil?
         else
           return ret
         end
@@ -65,11 +60,13 @@ module IOWithDeadlineMixin
       loop do
         case ret = yield
         when :wait_writable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
-          raise(exception) if ::IO.select(nil, [self], nil, remaining_time).nil?
+          if ::IO.select(nil, [self], nil, deadline.remaining(exception)).nil?
+            raise(exception)
+          end
         when :wait_readable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
-          raise(exception) if ::IO.select([self], nil, nil, remaining_time).nil?
+          if ::IO.select([self], nil, nil, deadline.remaining(exception)).nil?
+            raise(exception)
+          end
         else
           return ret
         end

@@ -2,6 +2,7 @@
 
 require_relative 'tcp-client/errors'
 require_relative 'tcp-client/address'
+require_relative 'tcp-client/deadline'
 require_relative 'tcp-client/tcp_socket'
 require_relative 'tcp-client/ssl_socket'
 require_relative 'tcp-client/configuration'
@@ -55,9 +56,9 @@ class TCPClient
   def with_deadline(timeout)
     previous_deadline = @deadline
     raise(NoBlockGiven) unless block_given?
-    tm = timeout&.to_f
-    raise(InvalidDeadLine) unless tm&.positive?
-    @deadline = Time.now + tm
+    timeout_f = timeout&.to_f
+    raise(InvalidDeadLine, timeout) unless timeout_f&.positive?
+    @deadline = Deadline.new(timeout_f)
     yield(self)
   ensure
     @deadline = previous_deadline
@@ -69,7 +70,7 @@ class TCPClient
       return read_with_deadline(nbytes, @deadline, exception)
     timeout = (timeout || @cfg.read_timeout).to_f
     return @socket.read(nbytes) unless timeout.positive?
-    read_with_deadline(nbytes, Time.now + timeout, exception)
+    read_with_deadline(nbytes, Deadline.new(timeout), exception)
   end
 
   def write(*msg, timeout: nil, exception: nil)
@@ -78,7 +79,7 @@ class TCPClient
       return write_with_deadline(msg, @deadline, exception)
     timeout = (timeout || @cfg.write_timeout).to_f
     return @socket.write(*msg) unless timeout.positive?
-    write_with_deadline(msg, Time.now + timeout, exception)
+    write_with_deadline(msg, Deadline.new(timeout), exception)
   end
 
   def flush

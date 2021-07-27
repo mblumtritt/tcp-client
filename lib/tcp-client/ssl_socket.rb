@@ -4,6 +4,7 @@ rescue LoadError
   return
 end
 
+require_relative 'deadline'
 require_relative 'mixin/io_with_deadline'
 
 class TCPClient
@@ -12,8 +13,8 @@ class TCPClient
 
     def initialize(socket, address, configuration, exception)
       ssl_params = Hash[configuration.ssl_params]
-      self.sync_close = true
       super(socket, create_context(ssl_params))
+      self.sync_close = true
       connect_to(
         address,
         ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE,
@@ -36,7 +37,7 @@ class TCPClient
       if timeout.zero?
         connect
       else
-        with_deadline(Time.now + timeout, exception) do
+        with_deadline(Deadline.new(timeout), exception) do
           connect_nonblock(exception: false)
         end
       end
