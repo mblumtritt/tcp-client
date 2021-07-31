@@ -58,10 +58,7 @@ class TCPClient
 
     def from_string(str)
       idx = str.rindex(':') or return nil, str.to_i
-      name = str[0, idx]
-      if name.start_with?('[') && name.end_with?(']')
-        name = name[1, name.size - 2]
-      end
+      name = str[0, idx].delete_prefix('[').delete_suffix(']')
       [name, str[idx + 1, str.size - idx].to_i]
     end
   end

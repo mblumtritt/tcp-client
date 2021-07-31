@@ -13,7 +13,6 @@ class TCPClient
     attr_reader :buffered,
                 :keep_alive,
                 :reverse_lookup,
-                :timeout,
                 :connect_timeout,
                 :read_timeout,
                 :write_timeout,
@@ -47,9 +46,12 @@ class TCPClient
     end
 
     def ssl=(value)
-      return @ssl_params = nil unless value
-      return @ssl_params = value.dup if Hash === value
-      @ssl_params ||= {}
+      @ssl_params =
+        if Hash === value
+          value.dup
+        else
+          value ? {} : nil
+        end
     end
 
     def buffered=(value)
@@ -65,8 +67,7 @@ class TCPClient
     end
 
     def timeout=(seconds)
-      @timeout =
-        @connect_timeout = @write_timeout = @read_timeout = seconds(seconds)
+      @connect_timeout = @write_timeout = @read_timeout = seconds(seconds)
     end
 
     def connect_timeout=(seconds)
@@ -107,7 +108,6 @@ class TCPClient
         buffered: @buffered,
         keep_alive: @keep_alive,
         reverse_lookup: @reverse_lookup,
-        timeout: @timeout,
         connect_timeout: @connect_timeout,
         read_timeout: @read_timeout,
         write_timeout: @write_timeout,

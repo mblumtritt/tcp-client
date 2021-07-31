@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module IOWithDeadlineMixin
   def self.included(mod)
     methods = mod.instance_methods
@@ -9,25 +11,22 @@ module IOWithDeadlineMixin
   end
 
   def read_with_deadline(bytes_to_read, deadline, exception)
-    raise(exception) if Time.now > deadline
+    raise(exception) unless deadline.remaining_time
     result = ''.b
-    return result if bytes_to_read <= 0
-    loop do
+    while result.bytesize < bytes_to_read
       read =
         with_deadline(deadline, exception) do
           read_nonblock(bytes_to_read - result.bytesize, exception: false)
         end
-      unless read
-        close
-        return result
-      end
-      result += read
-      return result if result.bytesize >= bytes_to_read
+      next result += read if read
+      close
+      break
     end
+    result
   end
 
   def write_with_deadline(data, deadline, exception)
-    raise(exception) if Time.now > deadline
+    raise(exception) unless deadline.remaining_time
     return 0 if (size = data.bytesize).zero?
     result = 0
     loop do
@@ -46,10 +45,10 @@ module IOWithDeadlineMixin
       loop do
         case ret = yield
         when :wait_writable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
+          remaining_time = deadline.remaining_time or raise(exception)
           raise(exception) if wait_writable(remaining_time).nil?
         when :wait_readable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
+          remaining_time = deadline.remaining_time or raise(exception)
           raise(exception) if wait_readable(remaining_time).nil?
         else
           return ret
@@ -65,10 +64,10 @@ module IOWithDeadlineMixin
       loop do
         case ret = yield
         when :wait_writable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
+          remaining_time = deadline.remaining_time or raise(exception)
           raise(exception) if ::IO.select(nil, [self], nil, remaining_time).nil?
         when :wait_readable
-          raise(exception) if (remaining_time = deadline - Time.now) <= 0
+          remaining_time = deadline.remaining_time or raise(exception)
           raise(exception) if ::IO.select([self], nil, nil, remaining_time).nil?
         else
           return ret
