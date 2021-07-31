@@ -2,6 +2,7 @@
 
 require_relative 'tcp-client/errors'
 require_relative 'tcp-client/address'
+require_relative 'tcp-client/deadline'
 require_relative 'tcp-client/tcp_socket'
 require_relative 'tcp-client/ssl_socket'
 require_relative 'tcp-client/configuration'
@@ -55,9 +56,8 @@ class TCPClient
   def with_deadline(timeout)
     previous_deadline = @deadline
     raise(NoBlockGiven) unless block_given?
-    tm = timeout&.to_f
-    raise(InvalidDeadLine) unless tm&.positive?
-    @deadline = Time.now + tm
+    @deadline = Deadline.new(timeout)
+    raise(InvalidDeadLine, timeout) unless @deadline.valid?
     yield(self)
   ensure
     @deadline = previous_deadline
@@ -67,18 +67,18 @@ class TCPClient
     raise(NotConnected) if closed?
     timeout.nil? && @deadline and
       return read_with_deadline(nbytes, @deadline, exception)
-    timeout = (timeout || @cfg.read_timeout).to_f
-    return @socket.read(nbytes) unless timeout.positive?
-    read_with_deadline(nbytes, Time.now + timeout, exception)
+    deadline = Deadline.new(timeout || @cfg.read_timeout)
+    return @socket.read(nbytes) unless deadline.valid?
+    read_with_deadline(nbytes, deadline, exception)
   end
 
   def write(*msg, timeout: nil, exception: nil)
     raise(NotConnected) if closed?
     timeout.nil? && @deadline and
       return write_with_deadline(msg, @deadline, exception)
-    timeout = (timeout || @cfg.write_timeout).to_f
-    return @socket.write(*msg) unless timeout.positive?
-    write_with_deadline(msg, Time.now + timeout, exception)
+    deadline = Deadline.new(timeout || @cfg.read_timeout)
+    return @socket.write(*msg) unless deadline.valid?
+    write_with_deadline(msg, deadline, exception)
   end
 
   def flush

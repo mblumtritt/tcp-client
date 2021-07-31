@@ -11,7 +11,6 @@ CLOBBER << 'prj'
 task(:default) { exec('rake --tasks') }
 
 Rake::TestTask.new(:test) do |task|
-  task.test_files = FileList['test/**/*_test.rb']
-  task.ruby_opts = %w[-w]
-  task.verbose = true
+  task.pattern = 'test/**/*_test.rb'
+  task.warning = task.verbose = true
 end
