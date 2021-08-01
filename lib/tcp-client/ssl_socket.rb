@@ -17,12 +17,10 @@ class TCPClient
       ssl_params = Hash[configuration.ssl_params]
       super(socket, create_context(ssl_params))
       self.sync_close = true
-      connect_to(
-        address,
-        ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE,
-        configuration.connect_timeout,
-        exception
-      )
+      self.hostname = address.hostname
+      deadline = Deadline.new(configuration.connect_timeout)
+      deadline.valid? ? connect_with_deadline(deadline, exception) : connect
+      post_connection_check(address.hostname) if should_verify?(ssl_params)
     end
 
     private
@@ -33,17 +31,12 @@ class TCPClient
       context
     end
 
-    def connect_to(address, check, timeout, exception)
-      self.hostname = address.hostname
-      deadline = Deadline.new(timeout)
-      if deadline.valid?
-        with_deadline(deadline, exception) do
-          connect_nonblock(exception: false)
-        end
-      else
-        connect
-      end
-      post_connection_check(address.hostname) if check
+    def connect_with_deadline(deadline, exception)
+      with_deadline(deadline, exception) { connect_nonblock(exception: false) }
+    end
+
+    def should_verify?(ssl_params)
+      ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE
     end
   end
 

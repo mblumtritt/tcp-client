@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require 'socket'
-
 class TCPClient
   class NoOpenSSL < RuntimeError
     def initialize
-      super('OpenSSL is not avail')
+      super('OpenSSL is not available')
     end
   end
 
@@ -29,7 +27,7 @@ class TCPClient
 
   class NotAnException < TypeError
     def initialize(object)
-      super("not a valid exception class - #{object.inspect}")
+      super("exception class required - #{object.inspect}")
     end
   end
 

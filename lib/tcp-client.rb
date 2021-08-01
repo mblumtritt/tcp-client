@@ -29,8 +29,8 @@ class TCPClient
   end
 
   def connect(addr, configuration, exception: nil)
-    close
     raise(NoOpenSSL) if configuration.ssl? && !defined?(SSLSocket)
+    close
     @address = Address.new(addr)
     @cfg = configuration.dup
     exception ||= configuration.connect_timeout_error
@@ -89,11 +89,8 @@ class TCPClient
   private
 
   def read_with_deadline(nbytes, deadline, exception)
-    @socket.read_with_deadline(
-      nbytes,
-      deadline,
-      exception || @cfg.read_timeout_error
-    )
+    exception ||= @cfg.read_timeout_error
+    @socket.read_with_deadline(nbytes, deadline, exception)
   end
 
   def write_with_deadline(msg, deadline, exception)
