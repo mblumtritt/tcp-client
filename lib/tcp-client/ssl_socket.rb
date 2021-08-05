@@ -26,9 +26,7 @@ class TCPClient
     private
 
     def create_context(ssl_params)
-      context = OpenSSL::SSL::SSLContext.new
-      context.set_params(ssl_params)
-      context
+      OpenSSL::SSL::SSLContext.new.tap { |ctx| ctx.set_params(ssl_params) }
     end
 
     def connect_with_deadline(deadline, exception)

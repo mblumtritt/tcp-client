@@ -10,9 +10,9 @@ require_relative 'tcp-client/default_configuration'
 require_relative 'tcp-client/version'
 
 class TCPClient
-  def self.open(addr, configuration = Configuration.default)
+  def self.open(address, configuration = Configuration.default)
     client = new
-    client.connect(Address.new(addr), configuration)
+    client.connect(Address.new(address), configuration)
     block_given? ? yield(client) : client
   ensure
     client&.close if block_given?
@@ -21,21 +21,21 @@ class TCPClient
   attr_reader :address
 
   def initialize
-    @socket = @address = @deadline = @cfg = nil
+    @socket = @address = @deadline = @configuration = nil
   end
 
   def to_s
-    @address ? @address.to_s : ''
+    @address&.to_s || ''
   end
 
-  def connect(addr, configuration, exception: nil)
+  def connect(address, configuration, exception: nil)
     raise(NoOpenSSL) if configuration.ssl? && !defined?(SSLSocket)
     close
-    @address = Address.new(addr)
-    @cfg = configuration.dup
+    @address = Address.new(address)
+    @configuration = configuration.dup
     exception ||= configuration.connect_timeout_error
-    @socket = TCPSocket.new(@address, @cfg, exception)
-    @cfg.ssl? &&
+    @socket = TCPSocket.new(@address, @configuration, exception)
+    @configuration.ssl? &&
       @socket = SSLSocket.new(@socket, @address, configuration, exception)
     self
   end
@@ -67,7 +67,7 @@ class TCPClient
     raise(NotConnected) if closed?
     timeout.nil? && @deadline and
       return read_with_deadline(nbytes, @deadline, exception)
-    deadline = Deadline.new(timeout || @cfg.read_timeout)
+    deadline = Deadline.new(timeout || @configuration.read_timeout)
     return @socket.read(nbytes) unless deadline.valid?
     read_with_deadline(nbytes, deadline, exception)
   end
@@ -76,7 +76,7 @@ class TCPClient
     raise(NotConnected) if closed?
     timeout.nil? && @deadline and
       return write_with_deadline(msg, @deadline, exception)
-    deadline = Deadline.new(timeout || @cfg.read_timeout)
+    deadline = Deadline.new(timeout || @configuration.read_timeout)
     return @socket.write(*msg) unless deadline.valid?
     write_with_deadline(msg, deadline, exception)
   end
@@ -89,12 +89,12 @@ class TCPClient
   private
 
   def read_with_deadline(nbytes, deadline, exception)
-    exception ||= @cfg.read_timeout_error
+    exception ||= @configuration.read_timeout_error
     @socket.read_with_deadline(nbytes, deadline, exception)
   end
 
   def write_with_deadline(msg, deadline, exception)
-    exception ||= @cfg.write_timeout_error
+    exception ||= @configuration.write_timeout_error
     msg.sum do |chunk|
       @socket.write_with_deadline(chunk.b, deadline, exception)
     end
