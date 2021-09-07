@@ -8,10 +8,9 @@ class TCPClient
   class TCPSocket < ::Socket
     include IOWithDeadlineMixin
 
-    def initialize(address, configuration, exception)
+    def initialize(address, configuration, deadline, exception)
       super(address.addrinfo.ipv6? ? :INET6 : :INET, :STREAM)
       configure(configuration)
-      deadline = Deadline.new(configuration.connect_timeout)
       connect_to(as_addr_in(address), deadline, exception)
     end
 

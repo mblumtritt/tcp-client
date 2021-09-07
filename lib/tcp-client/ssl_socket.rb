@@ -13,12 +13,11 @@ class TCPClient
   class SSLSocket < ::OpenSSL::SSL::SSLSocket
     include IOWithDeadlineMixin
 
-    def initialize(socket, address, configuration, exception)
+    def initialize(socket, address, configuration, deadline, exception)
       ssl_params = Hash[configuration.ssl_params]
       super(socket, create_context(ssl_params))
       self.sync_close = true
       self.hostname = address.hostname
-      deadline = Deadline.new(configuration.connect_timeout)
       deadline.valid? ? connect_with_deadline(deadline, exception) : connect
       post_connection_check(address.hostname) if should_verify?(ssl_params)
     end

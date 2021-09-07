@@ -13,12 +13,15 @@ class TCPClient
   def self.open(address, configuration = Configuration.default)
     client = new
     client.connect(Address.new(address), configuration)
-    block_given? ? yield(client) : client
-  ensure
-    client&.close if block_given?
+    return client unless block_given?
+    begin
+      yield(client)
+    ensure
+      client.close
+    end
   end
 
-  attr_reader :address
+  attr_reader :address, :configuration
 
   def initialize
     @socket = @address = @deadline = @configuration = nil
@@ -32,11 +35,8 @@ class TCPClient
     raise(NoOpenSSL) if configuration.ssl? && !defined?(SSLSocket)
     close
     @address = Address.new(address)
-    @configuration = configuration.dup
-    exception ||= configuration.connect_timeout_error
-    @socket = TCPSocket.new(@address, @configuration, exception)
-    @configuration.ssl? &&
-      @socket = SSLSocket.new(@socket, @address, configuration, exception)
+    @configuration = configuration.dup.freeze
+    @socket = create_socket(exception)
     self
   end
 
@@ -87,6 +87,24 @@ class TCPClient
   end
 
   private
+
+  def create_socket(exception)
+    exception ||= @configuration.connect_timeout_error
+    deadline = Deadline.new(@configuration.connect_timeout)
+    socket = TCPSocket.new(@address, @configuration, deadline, exception)
+    @configuration.ssl? ? as_ssl_socket(socket, deadline, exception) : socket
+  end
+
+  def as_ssl_socket(socket, deadline, exception)
+    SSLSocket.new(socket, @address, @configuration, deadline, exception)
+  rescue StandardError => e
+    begin
+      socket.close
+    rescue IOError
+      # ignore!
+    end
+    raise(e, cause: e.cause)
+  end
 
   def read_with_deadline(nbytes, deadline, exception)
     exception ||= @configuration.read_timeout_error
