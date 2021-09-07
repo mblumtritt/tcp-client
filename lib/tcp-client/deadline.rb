@@ -2,7 +2,7 @@
 
 class TCPClient
   class Deadline
-    MONOTONIC = !!defined?(Process::CLOCK_MONOTONIC)
+    MONOTONIC = defined?(Process::CLOCK_MONOTONIC) ? true : false
 
     def initialize(timeout)
       timeout = timeout&.to_f

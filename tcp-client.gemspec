@@ -11,14 +11,14 @@ Gem::Specification.new do |spec|
 
   spec.summary = 'A TCP client implementation with working timeout support.'
   spec.description = <<~DESCRIPTION
-      This Gem implements a TCP client with (optional) SSL support.
-      It is an easy to use, versatile configurable client that can correctly
-      handle time limits.
-      Unlike other implementations, this client respects
-      predefined/configurable time limits for each method
-      (`connect`, `read`, `write`). Deadlines for a sequence of read/write
-      actions can also be monitored.
-    DESCRIPTION
+    This Gem implements a TCP client with (optional) SSL support.
+    It is an easy to use, versatile configurable client that can correctly
+    handle time limits.
+    Unlike other implementations, this client respects
+    predefined/configurable time limits for each method
+    (`connect`, `read`, `write`). Deadlines for a sequence of read/write
+    actions can also be monitored.
+  DESCRIPTION
   spec.homepage = 'https://github.com/mblumtritt/tcp-client'
   spec.license = 'BSD-3-Clause'
 
