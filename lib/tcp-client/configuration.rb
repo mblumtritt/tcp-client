@@ -37,7 +37,7 @@ class TCPClient
 
     def initialize_copy(_org)
       super
-      @ssl_params = @ssl_params.dup
+      @ssl_params = Hash[@ssl_params] if @ssl_params
       self
     end
 
@@ -48,7 +48,7 @@ class TCPClient
     def ssl=(value)
       @ssl_params =
         if Hash === value
-          value.dup
+          Hash[value]
         else
           value ? {} : nil
         end

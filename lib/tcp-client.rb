@@ -91,19 +91,9 @@ class TCPClient
   def create_socket(exception)
     exception ||= @configuration.connect_timeout_error
     deadline = Deadline.new(@configuration.connect_timeout)
-    socket = TCPSocket.new(@address, @configuration, deadline, exception)
-    @configuration.ssl? ? as_ssl_socket(socket, deadline, exception) : socket
-  end
-
-  def as_ssl_socket(socket, deadline, exception)
-    SSLSocket.new(socket, @address, @configuration, deadline, exception)
-  rescue StandardError => e
-    begin
-      socket.close
-    rescue IOError
-      # ignore!
-    end
-    raise(e, cause: e.cause)
+    @socket = TCPSocket.new(@address, @configuration, deadline, exception)
+    return @socket unless @configuration.ssl?
+    SSLSocket.new(@socket, @address, @configuration, deadline, exception)
   end
 
   def read_with_deadline(nbytes, deadline, exception)
