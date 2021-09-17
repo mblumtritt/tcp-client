@@ -29,4 +29,6 @@ class TCPClient
       end
     end
   end
+
+  private_constant(:Deadline)
 end
