@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require_relative '../test_helper'
+require_relative '../helper'
 
-class VersionTest < MiniTest::Test
-  parallelize_me!
-
+class VersionTest < Test
   def test_format
     assert_match(/\d+\.\d+\.\d+/, TCPClient::VERSION)
   end

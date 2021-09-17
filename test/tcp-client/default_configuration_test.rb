@@ -1,4 +1,4 @@
-require_relative '../test_helper'
+require_relative '../helper'
 
 class DefauktConfigurationTest < MiniTest::Test
   def test_default

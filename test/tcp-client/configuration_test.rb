@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require_relative '../test_helper'
+require_relative '../helper'
 
-class ConfigurationTest < MiniTest::Test
-  parallelize_me!
-
+class ConfigurationTest < Test
   def test_defaults
     subject = TCPClient::Configuration.new
     assert(subject.buffered)
