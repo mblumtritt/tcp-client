@@ -76,7 +76,7 @@ class TCPClient
     @deadline = previous_deadline
   end
 
-  def read(nbytes, timeout: nil, exception: nil)
+  def read(nbytes = nil, timeout: nil, exception: nil)
     raise(NotConnected) if closed?
     deadline = create_deadline(timeout, configuration.read_timeout)
     return @socket.read(nbytes) unless deadline.valid?

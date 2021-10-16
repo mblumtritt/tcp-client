@@ -12,6 +12,13 @@ module IOWithDeadlineMixin
 
   def read_with_deadline(bytes_to_read, deadline, exception)
     raise(exception) unless deadline.remaining_time
+    if bytes_to_read.nil?
+      return(
+        with_deadline(deadline, exception) do
+          read_nonblock(65_536, exception: false)
+        end
+      )
+    end
     result = ''.b
     while result.bytesize < bytes_to_read
       read =

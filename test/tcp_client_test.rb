@@ -120,7 +120,7 @@ class TCPClientTest < Test
       assert_raises(TCPClient::ReadTimeoutError) do
         subject.with_deadline(0.25) do |*args|
           assert_equal([subject], args)
-          loop { subject.read(0) }
+          loop { subject.read(42) }
         end
       end
     end
