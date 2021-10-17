@@ -1,37 +1,37 @@
 # frozen_string_literal: true
 
 class TCPClient
-  class NoOpenSSL < RuntimeError
+  class NoOpenSSLError < RuntimeError
     def initialize
       super('OpenSSL is not available')
     end
   end
 
-  class NoBlockGiven < ArgumentError
+  class NoBlockGivenError < ArgumentError
     def initialize
       super('no block given')
     end
   end
 
-  class InvalidDeadLine < ArgumentError
+  class InvalidDeadLineError < ArgumentError
     def initialize(timeout)
       super("invalid deadline - #{timeout}")
     end
   end
 
-  class UnknownAttribute < ArgumentError
+  class UnknownAttributeError < ArgumentError
     def initialize(attribute)
       super("unknown attribute - #{attribute}")
     end
   end
 
-  class NotAnException < TypeError
+  class NotAnExceptionError < TypeError
     def initialize(object)
       super("exception class required - #{object.inspect}")
     end
   end
 
-  class NotConnected < IOError
+  class NotConnectedError < IOError
     def initialize
       super('client not connected')
     end
@@ -65,6 +65,18 @@ class TCPClient
     end
   end
 
-  Timeout = TimeoutError # backward compatibility
-  deprecate_constant(:Timeout)
+  NoOpenSSL = NoOpenSSLError
+  NoBlockGiven = NoBlockGivenError
+  InvalidDeadLine = InvalidDeadLineError
+  UnknownAttribute = UnknownAttributeError
+  NotAnException = NotAnExceptionError
+  NotConnected = NotConnectedError
+  deprecate_constant(
+    :NoOpenSSL,
+    :NoBlockGiven,
+    :InvalidDeadLine,
+    :UnknownAttribute,
+    :NotAnException,
+    :NotConnected
+  )
 end

@@ -24,7 +24,7 @@ class TCPClient
     configuration = Configuration.default
   )
     client = nil
-    raise(NoBlockGiven) unless block_given?
+    raise(NoBlockGivenError) unless block_given?
     address = Address.new(address)
     client = new
     client.with_deadline(timeout) do
@@ -46,7 +46,7 @@ class TCPClient
 
   def connect(address, configuration, timeout: nil, exception: nil)
     close if @socket
-    raise(NoOpenSSL) if configuration.ssl? && !defined?(SSLSocket)
+    raise(NoOpenSSLError) if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(address)
     @configuration = configuration.dup.freeze
     @socket = create_socket(timeout, exception)
@@ -68,16 +68,16 @@ class TCPClient
 
   def with_deadline(timeout)
     previous_deadline = @deadline
-    raise(NoBlockGiven) unless block_given?
+    raise(NoBlockGivenError) unless block_given?
     @deadline = Deadline.new(timeout)
-    raise(InvalidDeadLine, timeout) unless @deadline.valid?
+    raise(InvalidDeadLineError, timeout) unless @deadline.valid?
     yield(self)
   ensure
     @deadline = previous_deadline
   end
 
   def read(nbytes = nil, timeout: nil, exception: nil)
-    raise(NotConnected) if closed?
+    raise(NotConnectedError) if closed?
     deadline = create_deadline(timeout, configuration.read_timeout)
     return @socket.read(nbytes) unless deadline.valid?
     exception ||= configuration.read_timeout_error
@@ -85,7 +85,7 @@ class TCPClient
   end
 
   def write(*msg, timeout: nil, exception: nil)
-    raise(NotConnected) if closed?
+    raise(NotConnectedError) if closed?
     deadline = create_deadline(timeout, configuration.write_timeout)
     return @socket.write(*msg) unless deadline.valid?
     exception ||= configuration.write_timeout_error
