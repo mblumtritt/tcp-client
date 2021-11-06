@@ -5,6 +5,8 @@ module IOWithDeadlineMixin
     methods = mod.instance_methods
     if methods.index(:wait_writable) && methods.index(:wait_readable)
       mod.include(ViaWaitMethod)
+    elsif methods.index(:to_io)
+      mod.include(ViaIOWaitMethod)
     else
       mod.include(ViaSelect)
     end
@@ -66,6 +68,25 @@ module IOWithDeadlineMixin
     end
   end
 
+  module ViaIOWaitMethod
+    private def with_deadline(deadline, exception)
+      loop do
+        case ret = yield
+        when :wait_writable
+          remaining_time = deadline.remaining_time or raise(exception)
+          raise(exception) if to_io.wait_writable(remaining_time).nil?
+        when :wait_readable
+          remaining_time = deadline.remaining_time or raise(exception)
+          raise(exception) if to_io.wait_readable(remaining_time).nil?
+        else
+          return ret
+        end
+      end
+    rescue Errno::ETIMEDOUT
+      raise(exception)
+    end
+  end
+
   module ViaSelect
     private def with_deadline(deadline, exception)
       loop do
@@ -85,5 +106,5 @@ module IOWithDeadlineMixin
     end
   end
 
-  private_constant(:ViaWaitMethod, :ViaSelect)
+  private_constant(:ViaWaitMethod, :ViaIOWaitMethod, :ViaSelect)
 end

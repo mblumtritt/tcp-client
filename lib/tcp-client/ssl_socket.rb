@@ -33,7 +33,8 @@ class TCPClient
     end
 
     def should_verify?(ssl_params)
-      ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE
+      ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE &&
+        context.verify_hostname
     end
   end
 
