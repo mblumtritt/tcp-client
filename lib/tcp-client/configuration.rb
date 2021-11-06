@@ -83,23 +83,23 @@ class TCPClient
     end
 
     def timeout_error=(exception)
-      raise(NotAnException, exception) unless exception_class?(exception)
+      raise(NotAnExceptionError, exception) unless exception_class?(exception)
       @connect_timeout_error =
         @read_timeout_error = @write_timeout_error = exception
     end
 
     def connect_timeout_error=(exception)
-      raise(NotAnException, exception) unless exception_class?(exception)
+      raise(NotAnExceptionError, exception) unless exception_class?(exception)
       @connect_timeout_error = exception
     end
 
     def read_timeout_error=(exception)
-      raise(NotAnException, exception) unless exception_class?(exception)
+      raise(NotAnExceptionError, exception) unless exception_class?(exception)
       @read_timeout_error = exception
     end
 
     def write_timeout_error=(exception)
-      raise(NotAnException, exception) unless exception_class?(exception)
+      raise(NotAnExceptionError, exception) unless exception_class?(exception)
       @write_timeout_error = exception
     end
 
@@ -136,7 +136,7 @@ class TCPClient
     def set(attribute, value)
       public_send("#{attribute}=", value)
     rescue NoMethodError
-      raise(UnknownAttribute, attribute)
+      raise(UnknownAttributeError, attribute)
     end
 
     def seconds(value)

@@ -25,8 +25,10 @@ class TCPClientTest < Test
     assert_equal('', subject.to_s)
     assert_nil(subject.address)
     subject.close
-    assert_raises(TCPClient::NotConnected) { subject.write('hello world!') }
-    assert_raises(TCPClient::NotConnected) { subject.read(42) }
+    assert_raises(TCPClient::NotConnectedError) do
+      subject.write('hello world!')
+    end
+    assert_raises(TCPClient::NotConnectedError) { subject.read(42) }
   end
 
   def create_nonconnected_client
@@ -46,8 +48,10 @@ class TCPClientTest < Test
     assert_equal('localhost', subject.address.hostname)
     assert_instance_of(Addrinfo, subject.address.addrinfo)
     assert_same(0, subject.address.addrinfo.ip_port)
-    assert_raises(TCPClient::NotConnected) { subject.write('hello world!') }
-    assert_raises(TCPClient::NotConnected) { subject.read(42) }
+    assert_raises(TCPClient::NotConnectedError) do
+      subject.write('hello world!')
+    end
+    assert_raises(TCPClient::NotConnectedError) { subject.read(42) }
   end
 
   def test_connected_state
