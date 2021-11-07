@@ -28,6 +28,7 @@ class TCPClient
     def to_h
       { host: @hostname, port: @addrinfo.ip_port }
     end
+    alias to_hash to_h
 
     def ==(other)
       to_h == other.to_h

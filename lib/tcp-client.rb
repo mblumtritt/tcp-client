@@ -10,7 +10,7 @@ require_relative 'tcp-client/default_configuration'
 require_relative 'tcp-client/version'
 
 class TCPClient
-  def self.open(address, configuration = Configuration.default)
+  def self.open(address, configuration = nil)
     client = new
     client.connect(Address.new(address), configuration)
     block_given? ? yield(client) : client
@@ -18,11 +18,7 @@ class TCPClient
     client.close if block_given?
   end
 
-  def self.with_deadline(
-    timeout,
-    address,
-    configuration = Configuration.default
-  )
+  def self.with_deadline(timeout, address, configuration = nil)
     client = nil
     raise(NoBlockGivenError) unless block_given?
     address = Address.new(address)
@@ -36,19 +32,15 @@ class TCPClient
 
   attr_reader :address, :configuration
 
-  def initialize
-    @socket = @address = @deadline = @configuration = nil
-  end
-
   def to_s
     @address&.to_s || ''
   end
 
-  def connect(address, configuration, timeout: nil, exception: nil)
+  def connect(address, configuration = nil, timeout: nil, exception: nil)
     close if @socket
     raise(NoOpenSSLError) if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(address)
-    @configuration = configuration.dup.freeze
+    @configuration = (configuration || Configuration.default).dup.freeze
     @socket = create_socket(timeout, exception)
     self
   end
@@ -56,7 +48,7 @@ class TCPClient
   def close
     @socket&.close
     self
-  rescue IOError
+  rescue *NETWORK_ERRORS
     self
   ensure
     @socket = @deadline = nil
@@ -79,23 +71,27 @@ class TCPClient
   def read(nbytes = nil, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?
     deadline = create_deadline(timeout, configuration.read_timeout)
-    return @socket.read(nbytes) unless deadline.valid?
+    return stem_errors { @socket.read(nbytes) } unless deadline.valid?
     exception ||= configuration.read_timeout_error
-    @socket.read_with_deadline(nbytes, deadline, exception)
+    stem_errors(exception) do
+      @socket.read_with_deadline(nbytes, deadline, exception)
+    end
   end
 
   def write(*msg, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?
     deadline = create_deadline(timeout, configuration.write_timeout)
-    return @socket.write(*msg) unless deadline.valid?
+    return stem_errors { @socket.write(*msg) } unless deadline.valid?
     exception ||= configuration.write_timeout_error
-    msg.sum do |chunk|
-      @socket.write_with_deadline(chunk.b, deadline, exception)
+    stem_errors(exception) do
+      msg.sum do |chunk|
+        @socket.write_with_deadline(chunk.b, deadline, exception)
+      end
     end
   end
 
   def flush
-    @socket&.flush
+    stem_errors { @socket&.flush }
     self
   end
 
@@ -108,8 +104,33 @@ class TCPClient
   def create_socket(timeout, exception)
     deadline = create_deadline(timeout, configuration.connect_timeout)
     exception ||= configuration.connect_timeout_error
-    @socket = TCPSocket.new(address, configuration, deadline, exception)
-    return @socket unless configuration.ssl?
-    SSLSocket.new(@socket, address, configuration, deadline, exception)
+    stem_errors(exception) do
+      @socket = TCPSocket.new(address, configuration, deadline, exception)
+      return @socket unless configuration.ssl?
+      SSLSocket.new(@socket, address, configuration, deadline, exception)
+    end
   end
+
+  def stem_errors(except = nil)
+    yield
+  rescue *NETWORK_ERRORS => e
+    raise unless configuration.normalize_network_errors
+    (except && e.is_a?(except)) ? raise : raise(NetworkError, e)
+  end
+
+  NETWORK_ERRORS =
+    [
+      Errno::EADDRNOTAVAIL,
+      Errno::ECONNABORTED,
+      Errno::ECONNREFUSED,
+      Errno::ECONNRESET,
+      Errno::EHOSTUNREACH,
+      Errno::EINVAL,
+      Errno::ENETUNREACH,
+      Errno::EPIPE,
+      IOError,
+      SocketError
+    ].tap do |errors|
+      errors << ::OpenSSL::SSL::SSLError if defined?(::OpenSSL::SSL::SSLError)
+    end.freeze
 end

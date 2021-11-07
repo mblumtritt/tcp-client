@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
 require 'rake/clean'
-require 'rake/testtask'
 require 'bundler/gem_tasks'
+require 'rspec/core/rake_task'
 
 $stdout.sync = $stderr.sync = true
 
 CLOBBER << 'prj'
 
-task(:default) { exec('rake --tasks') }
+task default: :spec
 
-Rake::TestTask.new(:test) do |task|
-  task.pattern = 'test/**/*_test.rb'
-  task.warning = task.verbose = true
+RSpec::Core::RakeTask.new do |task|
+  task.ruby_opts = %w[-w]
 end

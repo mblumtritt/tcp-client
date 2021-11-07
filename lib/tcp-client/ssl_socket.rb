@@ -25,7 +25,7 @@ class TCPClient
     private
 
     def create_context(ssl_params)
-      OpenSSL::SSL::SSLContext.new.tap { |ctx| ctx.set_params(ssl_params) }
+      ::OpenSSL::SSL::SSLContext.new.tap { |ctx| ctx.set_params(ssl_params) }
     end
 
     def connect_with_deadline(deadline, exception)
@@ -33,7 +33,7 @@ class TCPClient
     end
 
     def should_verify?(ssl_params)
-      ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE &&
+      ssl_params[:verify_mode] != ::OpenSSL::SSL::VERIFY_NONE &&
         context.verify_hostname
     end
   end

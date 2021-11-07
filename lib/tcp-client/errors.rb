@@ -31,13 +31,15 @@ class TCPClient
     end
   end
 
-  class NotConnectedError < IOError
+  NetworkError = Class.new(StandardError)
+
+  class NotConnectedError < NetworkError
     def initialize
       super('client not connected')
     end
   end
 
-  class TimeoutError < IOError
+  class TimeoutError < NetworkError
     def initialize(message = nil)
       super(message || "unable to #{action} in time")
     end

@@ -13,6 +13,7 @@ class TCPClient
     attr_reader :buffered,
                 :keep_alive,
                 :reverse_lookup,
+                :normalize_network_errors,
                 :connect_timeout,
                 :read_timeout,
                 :write_timeout,
@@ -27,6 +28,7 @@ class TCPClient
       @connect_timeout_error = ConnectTimeoutError
       @read_timeout_error = ReadTimeoutError
       @write_timeout_error = WriteTimeoutError
+      @normalize_network_errors = false
       options.each_pair { |attribute, value| set(attribute, value) }
     end
 
@@ -47,8 +49,8 @@ class TCPClient
 
     def ssl=(value)
       @ssl_params =
-        if Hash === value
-          Hash[value]
+        if value.respond_to?(:to_hash)
+          Hash[value.to_hash]
         else
           value ? {} : nil
         end
@@ -64,6 +66,10 @@ class TCPClient
 
     def reverse_lookup=(value)
       @reverse_lookup = value ? true : false
+    end
+
+    def normalize_network_errors=(value)
+      @normalize_network_errors = value ? true : false
     end
 
     def timeout=(seconds)
@@ -117,6 +123,7 @@ class TCPClient
         ssl_params: @ssl_params
       }
     end
+    alias to_hash to_h
 
     def ==(other)
       to_h == other.to_h
