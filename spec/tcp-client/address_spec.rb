@@ -91,6 +91,27 @@ RSpec.describe TCPClient::Address do
     end
   end
 
+  describe '#to_hash' do
+    subject(:address) { TCPClient::Address.new('localhost:42') }
+
+    it 'returns itself as an Hash' do
+      expect(address.to_hash).to eq(host: 'localhost', port: 42)
+    end
+  end
+
+  describe '#to_h' do
+    subject(:address) { TCPClient::Address.new('localhost:42') }
+
+    it 'returns itself as an Hash' do
+      expect(address.to_h).to eq(host: 'localhost', port: 42)
+    end
+
+    it 'returns allows to specify the keys the result should contain' do
+      expect(address.to_h(:port)).to eq(port: 42)
+      expect(address.to_h(:host)).to eq(host: 'localhost')
+    end
+  end
+
   describe 'comparison' do
     context 'comparing two equal instances' do
       let(:address_a) { TCPClient::Address.new('localhost:42') }
