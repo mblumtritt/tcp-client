@@ -14,7 +14,6 @@ class TCPClient
     include IOWithDeadlineMixin
 
     def initialize(socket, address, configuration, deadline, exception)
-      @new_session = nil
       ssl_params = Hash[configuration.ssl_params]
       super(socket, create_context(ssl_params))
       self.sync_close = true
@@ -27,6 +26,7 @@ class TCPClient
     private
 
     def create_context(ssl_params)
+      @new_session = nil
       ::OpenSSL::SSL::SSLContext.new.tap do |ctx|
         ctx.set_params(ssl_params)
         ctx.session_cache_mode = CONTEXT_CACHE_MODE
