@@ -106,7 +106,7 @@ RSpec.describe TCPClient::Address do
       expect(address.to_h).to eq(host: 'localhost', port: 42)
     end
 
-    it 'returns allows to specify the keys the result should contain' do
+    it 'allows to specify the keys the result should contain' do
       expect(address.to_h(:port)).to eq(port: 42)
       expect(address.to_h(:host)).to eq(host: 'localhost')
     end

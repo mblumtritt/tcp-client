@@ -109,24 +109,27 @@ class TCPClient
       @write_timeout_error = exception
     end
 
-    def to_h
+    def to_hash
       {
         buffered: @buffered,
         keep_alive: @keep_alive,
         reverse_lookup: @reverse_lookup,
         connect_timeout: @connect_timeout,
-        read_timeout: @read_timeout,
-        write_timeout: @write_timeout,
         connect_timeout_error: @connect_timeout_error,
+        read_timeout: @read_timeout,
         read_timeout_error: @read_timeout_error,
+        write_timeout: @write_timeout,
         write_timeout_error: @write_timeout_error,
         ssl_params: @ssl_params
       }
     end
-    alias to_hash to_h
+
+    def to_h(*args)
+      args.empty? ? to_hash : to_hash.slice(*args)
+    end
 
     def ==(other)
-      to_h == other.to_h
+      to_hash == other.to_hash
     end
     alias eql? ==
 
