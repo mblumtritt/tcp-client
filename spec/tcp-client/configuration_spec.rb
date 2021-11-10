@@ -165,7 +165,8 @@ RSpec.describe TCPClient::Configuration do
         read_timeout: 2,
         write_timeout: 3,
         ssl: {
-          ssl_version: :TLSv1_2
+          min_version: :TLS1_2,
+          max_version: :TLS1_3
         }
       )
     end
@@ -182,7 +183,8 @@ RSpec.describe TCPClient::Configuration do
         write_timeout: 3,
         write_timeout_error: TCPClient::WriteTimeoutError,
         ssl_params: {
-          ssl_version: :TLSv1_2
+          min_version: :TLS1_2,
+          max_version: :TLS1_3
         }
       )
     end
@@ -196,7 +198,8 @@ RSpec.describe TCPClient::Configuration do
         read_timeout: 2,
         write_timeout: 3,
         ssl: {
-          ssl_version: :TLSv1_2
+          min_version: :TLS1_2,
+          max_version: :TLS1_3
         }
       )
     end
@@ -213,7 +216,8 @@ RSpec.describe TCPClient::Configuration do
         write_timeout: 3,
         write_timeout_error: TCPClient::WriteTimeoutError,
         ssl_params: {
-          ssl_version: :TLSv1_2
+          min_version: :TLS1_2,
+          max_version: :TLS1_3
         }
       )
     end
@@ -234,7 +238,8 @@ RSpec.describe TCPClient::Configuration do
         read_timeout: 2,
         write_timeout: 3,
         ssl: {
-          ssl_version: :TLSv1_2
+          min_version: :TLS1_2,
+          max_version: :TLS1_3
         }
       )
     end
@@ -250,7 +255,10 @@ RSpec.describe TCPClient::Configuration do
       expect(duplicate.read_timeout).to be 2
       expect(duplicate.write_timeout).to be 3
       expect(duplicate.ssl?).to be true
-      expect(duplicate.ssl_params).to eq(ssl_version: :TLSv1_2)
+      expect(duplicate.ssl_params).to eq(
+        min_version: :TLS1_2,
+        max_version: :TLS1_3
+      )
     end
   end
 

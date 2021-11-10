@@ -40,7 +40,7 @@ class TCPClient
     close if @socket
     raise(NoOpenSSLError) if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(address)
-    @configuration = (configuration || Configuration.default).dup.freeze
+    @configuration = (configuration || Configuration.default).dup
     @socket = create_socket(timeout, exception)
     self
   end

@@ -10,6 +10,4 @@ CLOBBER << 'prj'
 
 task(:default) { exec('rake --tasks') }
 
-RSpec::Core::RakeTask.new do |task|
-  task.ruby_opts = %w[-w]
-end
+RSpec::Core::RakeTask.new { |task| task.ruby_opts = %w[-w] }

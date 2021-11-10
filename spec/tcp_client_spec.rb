@@ -557,7 +557,8 @@ RSpec.describe TCPClient do
         buffered: false,
         reverse_lookup: false,
         ssl: {
-          ssl_version: :TLSv1_2
+          min_version: :TLS1_2,
+          max_version: :TLS1_3
         }
       )
     end
