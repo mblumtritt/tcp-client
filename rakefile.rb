@@ -8,7 +8,7 @@ $stdout.sync = $stderr.sync = true
 
 CLOBBER << 'prj'
 
-task default: :spec
+task(:default) { exec('rake --tasks') }
 
 RSpec::Core::RakeTask.new do |task|
   task.ruby_opts = %w[-w]
