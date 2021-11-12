@@ -27,11 +27,11 @@ Gem::Specification.new do |spec|
     'https://github.com/mblumtritt/tcp-client/issues'
 
   spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec'
 
   all_files = Dir.chdir(__dir__) { `git ls-files -z`.split(0.chr) }
-  spec.test_files = all_files.grep(%r{^test/})
+  spec.test_files = all_files.grep(%r{^spec/})
   spec.files = all_files - spec.test_files
 
   spec.extra_rdoc_files = %w[README.md LICENSE]

@@ -18,6 +18,7 @@ class TCPClient
       super(socket, create_context(ssl_params))
       self.sync_close = true
       self.hostname = address.hostname
+      check_new_session if @new_session
       deadline.valid? ? connect_with_deadline(deadline, exception) : connect
       post_connection_check(address.hostname) if should_verify?(ssl_params)
     end
@@ -25,7 +26,19 @@ class TCPClient
     private
 
     def create_context(ssl_params)
-      OpenSSL::SSL::SSLContext.new.tap { |ctx| ctx.set_params(ssl_params) }
+      @new_session = nil
+      ::OpenSSL::SSL::SSLContext.new.tap do |ctx|
+        ctx.set_params(ssl_params)
+        ctx.session_cache_mode = CONTEXT_CACHE_MODE
+        ctx.session_new_cb = proc { |_, sess| @new_session = sess }
+      end
+    end
+
+    def check_new_session
+      time = @new_session.time.to_f + @new_session.timeout
+      if Process.clock_gettime(Process::CLOCK_REALTIME) < time
+        self.session = @new_session
+      end
     end
 
     def connect_with_deadline(deadline, exception)
@@ -33,9 +46,13 @@ class TCPClient
     end
 
     def should_verify?(ssl_params)
-      ssl_params[:verify_mode] != OpenSSL::SSL::VERIFY_NONE &&
+      ssl_params[:verify_mode] != ::OpenSSL::SSL::VERIFY_NONE &&
         context.verify_hostname
     end
+
+    CONTEXT_CACHE_MODE =
+      ::OpenSSL::SSL::SSLContext::SESSION_CACHE_CLIENT |
+        ::OpenSSL::SSL::SSLContext::SESSION_CACHE_NO_INTERNAL_STORE
   end
 
   private_constant(:SSLSocket)

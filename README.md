@@ -11,20 +11,22 @@ This Gem implements a TCP client with (optional) SSL support. It is an easy to u
 ```ruby
 require 'tcp-client'
 
-TCPClient.configure do |cfg|
-  cfg.connect_timeout = 1 # limit connect time the server to 1 second
-  cfg.ssl_params = { ssl_version: :TLSv1_2 } # use TLS 1.2
-end
+# create a configuration:
+# - don't use internal buffering
+# - use TLS 1.2 or TLS 1.3
+cfg = TCPClient::Configuration.create(
+  buffered: false,
+  ssl_params: {min_version: :TLS1_2, max_version: :TLS1_3}
+)
 
-TCPClient.open('www.google.com:443') do |client|
-  # next sequence should not last longer than 0.5 seconds
-  client.with_deadline(0.5) do
-    # simple HTTP get request
-    pp client.write("GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n")
-
-    # read "HTTP/1.1 " + 3 byte HTTP status code
-    pp client.read(12)
-  end
+# request to Google.com:
+# - limit all network interactions to 1.5 seconds
+# - use the Configuration cfg
+# - send a simple HTTP get request
+# - read 12 byte: "HTTP/1.1 " + 3 byte HTTP status code
+TCPClient.with_deadline(1.5, 'www.google.com:443', cfg) do |client|
+  client.write("GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n") # >= 40
+  client.read(12) # => "HTTP/1.1 200"
 end
 ```
 
@@ -41,13 +43,13 @@ gem 'tcp-client'
 and install it by running Bundler:
 
 ```bash
-$ bundle
+bundle
 ```
 
 To install the gem globally use:
 
 ```bash
-$ gem install tcp-client
+gem install tcp-client
 ```
 
 After that you need only a single line of code in your project to have all tools on board:
