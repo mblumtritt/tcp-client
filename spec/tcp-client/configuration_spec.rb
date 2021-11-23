@@ -157,39 +157,6 @@ RSpec.describe TCPClient::Configuration do
     end
   end
 
-  describe '#to_hash' do
-    subject(:configuration) do
-      TCPClient::Configuration.new(
-        buffered: false,
-        connect_timeout: 1,
-        read_timeout: 2,
-        write_timeout: 3,
-        ssl: {
-          min_version: :TLS1_2,
-          max_version: :TLS1_3
-        }
-      )
-    end
-
-    it 'returns itself as an Hash' do
-      expect(configuration.to_hash).to eq(
-        buffered: false,
-        keep_alive: true,
-        reverse_lookup: true,
-        connect_timeout: 1,
-        connect_timeout_error: TCPClient::ConnectTimeoutError,
-        read_timeout: 2,
-        read_timeout_error: TCPClient::ReadTimeoutError,
-        write_timeout: 3,
-        write_timeout_error: TCPClient::WriteTimeoutError,
-        ssl_params: {
-          min_version: :TLS1_2,
-          max_version: :TLS1_3
-        }
-      )
-    end
-  end
-
   describe '#to_h' do
     subject(:configuration) do
       TCPClient::Configuration.new(
@@ -220,12 +187,6 @@ RSpec.describe TCPClient::Configuration do
           max_version: :TLS1_3
         }
       )
-    end
-
-    it 'allows to specify the keys the result should contain' do
-      expect(
-        configuration.to_h(:keep_alive, :read_timeout, :write_timeout)
-      ).to eq(keep_alive: true, read_timeout: 2, write_timeout: 3)
     end
   end
 

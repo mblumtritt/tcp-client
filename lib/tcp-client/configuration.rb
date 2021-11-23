@@ -109,7 +109,7 @@ class TCPClient
       @write_timeout_error = exception
     end
 
-    def to_hash
+    def to_h
       {
         buffered: @buffered,
         keep_alive: @keep_alive,
@@ -124,12 +124,8 @@ class TCPClient
       }
     end
 
-    def to_h(*args)
-      args.empty? ? to_hash : to_hash.slice(*args)
-    end
-
     def ==(other)
-      to_hash == other.to_hash
+      to_h == other.to_h
     end
     alias eql? ==
 

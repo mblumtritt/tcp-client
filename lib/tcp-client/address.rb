@@ -25,16 +25,12 @@ class TCPClient
       "#{@hostname}:#{@addrinfo.ip_port}"
     end
 
-    def to_hash
+    def to_h
       { host: @hostname, port: @addrinfo.ip_port }
     end
 
-    def to_h(*args)
-      args.empty? ? to_hash : to_hash.slice(*args)
-    end
-
     def ==(other)
-      to_hash == other.to_hash
+      to_h == other.to_h
     end
     alias eql? ==
 
