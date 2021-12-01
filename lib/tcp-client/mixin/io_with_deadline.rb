@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-module IOWithDeadlineMixin
+# @!visibility private
+module IOWithDeadlineMixin # :nodoc:
   def self.included(mod)
     methods = mod.instance_methods
     if methods.index(:wait_writable) && methods.index(:wait_readable)

@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'yard'
 
   all_files = Dir.chdir(__dir__) { `git ls-files -z`.split(0.chr) }
   spec.test_files = all_files.grep(%r{^spec/})

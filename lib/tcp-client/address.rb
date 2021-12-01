@@ -3,9 +3,44 @@
 require 'socket'
 
 class TCPClient
+  #
+  # The address used by a TCPClient
+  #
   class Address
-    attr_reader :hostname, :addrinfo
+    #
+    # @return [String] the host name
+    #
+    attr_reader :hostname
 
+    #
+    # @return [Addrinfo] the address info
+    #
+    attr_reader :addrinfo
+
+    #
+    # Initializes an address
+    # @overload initialize(addr)
+    #   The addr can be specified as
+    #   - a valid named address containing the port like +my.host.test:80+
+    #   - a valid TCPv4 address like +142.250.181.206:80+
+    #   - a valid TCPv6 address like +[2001:16b8:5093:3500:ad77:abe6:eb88:47b6]:80+
+    #
+    #   @param addr [String] address string
+    #
+    # @overload initialize(address)
+    #   Used to create a copy
+    #
+    #   @param address [Address]
+    #
+    # @overload initialize(addrinfo)
+    #
+    #   @param addrinfo [Addrinfo] containing the addressed host and port
+    #
+    # @overload initialize(port)
+    #   Adresses the port on the local machine.
+    #
+    #   @param port [Integer] the addressed port
+    #
     def initialize(addr)
       case addr
       when self.class
@@ -20,20 +55,28 @@ class TCPClient
       @addrinfo.freeze
     end
 
+    #
+    # @return [String] text representation of self as "<host>:<port>"
+    #
     def to_s
       return "[#{@hostname}]:#{@addrinfo.ip_port}" if @hostname.index(':') # IP6
       "#{@hostname}:#{@addrinfo.ip_port}"
     end
 
+    #
+    # @return [Hash] containing the host and port
+    #
     def to_h
       { host: @hostname, port: @addrinfo.ip_port }
     end
 
+    # @!visibility private
     def ==(other)
       to_h == other.to_h
     end
     alias eql? ==
 
+    # @!visibility private
     def equal?(other)
       self.class == other.class && self == other
     end

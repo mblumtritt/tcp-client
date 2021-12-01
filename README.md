@@ -30,7 +30,7 @@ TCPClient.with_deadline(1.5, 'www.google.com:443', cfg) do |client|
 end
 ```
 
-### Installation
+## Installation
 
 Use [Bundler](http://gembundler.com/) to use TCPClient in your own project:
 

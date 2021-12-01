@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
 class TCPClient
-  VERSION = '0.8.1'
+  #
+  # The current gem version.
+  #
+  VERSION = '0.9.0'
 end
