@@ -133,9 +133,9 @@ class TCPClient
   #
   def connect(address, configuration = nil, timeout: nil, exception: nil)
     close if @socket
-    raise(NoOpenSSLError) if configuration.ssl? && !defined?(SSLSocket)
     @address = Address.new(address)
     @configuration = (configuration || Configuration.default).dup
+    raise(NoOpenSSLError) if @configuration.ssl? && !defined?(SSLSocket)
     @socket = create_socket(timeout, exception)
     self
   end
@@ -277,4 +277,5 @@ class TCPClient
     ].tap do |errors|
       errors << ::OpenSSL::SSL::SSLError if defined?(::OpenSSL::SSL::SSLError)
     end.freeze
+  private_constant(:NETWORK_ERRORS)
 end
