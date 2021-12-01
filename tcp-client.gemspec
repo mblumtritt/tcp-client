@@ -23,6 +23,8 @@ Gem::Specification.new do |spec|
   spec.license = 'BSD-3-Clause'
 
   spec.metadata['source_code_uri'] = 'https://github.com/mblumtritt/tcp-client'
+  spec.metadata['documentation_uri'] =
+    'https://rubydoc.info/github/mblumtritt/tcp-client'
   spec.metadata['bug_tracker_uri'] =
     'https://github.com/mblumtritt/tcp-client/issues'
 
