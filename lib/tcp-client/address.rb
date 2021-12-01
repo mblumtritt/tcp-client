@@ -21,9 +21,9 @@ class TCPClient
     # Initializes an address
     # @overload initialize(addr)
     #   The addr can be specified as
-    #   - a valid named address containing the port like +my.host.test:80+
-    #   - a valid TCPv4 address like +142.250.181.206:80+
-    #   - a valid TCPv6 address like +[2001:16b8:5093:3500:ad77:abe6:eb88:47b6]:80+
+    #   - a valid named address containing the port like "my.host.test:80"
+    #   - a valid TCPv4 address like "142.250.181.206:80"
+    #   - a valid TCPv6 address like "[2001:16b8:5093:3500:ad77:abe6:eb88:47b6]:80"
     #
     #   @param addr [String] address string
     #

@@ -2,9 +2,15 @@
 
 A TCP client implementation with working timeout support.
 
+[![Gem Version](https://badge.fury.io/rb/tcp-client.svg)](https://badge.fury.io/rb/tcp-client)
+
 ## Description
 
 This Gem implements a TCP client with (optional) SSL support. It is an easy to use, versatile configurable client that can correctly handle time limits. Unlike other implementations, this client respects predefined/configurable time limits for each method (`connect`, `read`, `write`). Deadlines for a sequence of read/write actions can also be monitored.
+
+## Help
+
+The latest help can be found at [rubydoc.info](https://rubydoc.info/github/mblumtritt/tcp-client/main/index)
 
 ## Sample
 
@@ -29,6 +35,8 @@ TCPClient.with_deadline(1.5, 'www.google.com:443', cfg) do |client|
   client.read(12) # => "HTTP/1.1 200"
 end
 ```
+
+For more samples see [the samples dir](https://github.com/mblumtritt/tcp-client/tree/main/sample)
 
 ## Installation
 
