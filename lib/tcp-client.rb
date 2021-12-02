@@ -15,7 +15,7 @@ require_relative 'tcp-client/version'
 # All connect/read/write actions can be monitored to ensure that all actions
 # terminate before given time limits - or raise an exception.
 #
-# @example - request to Google.com and limit all network interactions to 1.5 seconds
+# @example request to Google.com and limit network interactions to 1.5 seconds
 #   TCPClient.with_deadline(1.5, 'www.google.com:443') do |client|
 #     client.write("GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n")
 #     client.read(12)
@@ -36,8 +36,10 @@ class TCPClient
   # If no block is giiven the connected client instance is returned.
   # This can be used as a shorthand to create & connect a client.
   #
-  # @param address [Address, String, Addrinfo, Integer] the address to connect to, see {Address#initialize} for valid formats
-  # @param configuration [Configuration] the {Configuration} to be used for this instance
+  # @param address [Address, String, Addrinfo, Integer] the address to connect
+  #   to, see {Address#initialize} for valid formats
+  # @param configuration [Configuration] the {Configuration} to be used for
+  #   this instance
   #
   # @yieldparam client [TCPClient] the connected client
   # @yieldreturn [Object] any result
@@ -65,9 +67,12 @@ class TCPClient
   # closed and which read/write calls should not last longer than the timeout
   # limit.
   #
-  # @param timeout [Numeric] maximum time in seconds for all {#read} and {#write} calls within the block
-  # @param address [Address, String, Addrinfo, Integer] the address to connect to, see {Address#initialize} for valid formats
-  # @param configuration [Configuration] the {Configuration} to be used for this instance
+  # @param timeout [Numeric] maximum time in seconds for all {#read} and
+  #   {#write} calls within the block
+  # @param address [Address, String, Addrinfo, Integer] the address to connect
+  #   to, see {Address#initialize} for valid formats
+  # @param configuration [Configuration] the {Configuration} to be used for
+  #   this instance
   #
   # @yieldparam client [TCPClient] the connected client
   # @yieldreturn [Object] any result
@@ -118,14 +123,19 @@ class TCPClient
   #
   # Establishes a new connection to a given address.
   #
-  # It accepts a connection-specific configuration or uses the global {.default_configuration}. The {#configuration} used by this instance will
+  # It accepts a connection-specific configuration or uses the global
+  # {.default_configuration}. The {#configuration} used by this instance will
   # be a copy of the configuration used for this method call. This allows to
   # configure the behavior per connection.
   #
-  # @param address [Address, String, Addrinfo, Integer] the address to connect to, see {Address#initialize} for valid formats
-  # @param configuration [Configuration] the {Configuration} to be used for this instance
-  # @param timeout [Numeric] maximum time in seconds to read; used to override the configuration's +connect_timeout+.
-  # @param exception [Class] exception class to be used when the read timeout reached; used to override the configuration's +connect_timeout_error+.
+  # @param address [Address, String, Addrinfo, Integer] the address to connect
+  #   to, see {Address#initialize} for valid formats
+  # @param configuration [Configuration] the {Configuration} to be used for
+  #   this instance
+  # @param timeout [Numeric] maximum time in seconds to read; used to override
+  #   the configuration's +connect_timeout+.
+  # @param exception [Class] exception class to be used when the read timeout
+  #   reached; used to override the configuration's +connect_timeout_error+.
   #
   # @return [self]
   #
@@ -161,13 +171,14 @@ class TCPClient
   # with the server is finished before a given amount of time you can use this
   # method to define such a deadline.
   #
-  # @example - ensure to send a welcome message and receive a 64 byte answer from server
+  # @example ensure to send a welcome message and receive a 64 byte answer
   #   answer = client.with_deadline(2.5) do
   #     client.write('Helo')
   #     client.read(64)
   #   end
   #
-  # @param timeout [Numeric] maximum time in seconds for all {#read} and {#write} calls within the block
+  # @param timeout [Numeric] maximum time in seconds for all {#read} and
+  #   {#write} calls within the block
   #
   # @yieldparam client [TCPClient] self
   #
@@ -189,8 +200,10 @@ class TCPClient
   # Read the given nbytes or the next available buffer from server.
   #
   # @param nbytes [Integer] the number of bytes to read
-  # @param timeout [Numeric] maximum time in seconds to read; used to override the configuration's +read_timeout+.
-  # @param exception [Class] exception class to be used when the read timeout reached; used to override the configuration's +read_timeout_error+.
+  # @param timeout [Numeric] maximum time in seconds to read; used to override
+  #   the configuration's +read_timeout+.
+  # @param exception [Class] exception class to be used when the read timeout
+  #   reached; used to override the configuration's +read_timeout_error+.
   #
   # @return [String] buffer read
   #
@@ -210,8 +223,10 @@ class TCPClient
   # Write the given messages to the server.
   #
   # @param messages [Array<String>] messages to write
-  # @param timeout [Numeric] maximum time in seconds to read; used to override the configuration's +write_timeout+.
-  # @param exception [Class] exception class to be used when the read timeout reached; used to override the configuration's +write_timeout_error+.
+  # @param timeout [Numeric] maximum time in seconds to read; used to override
+  #   the configuration's +write_timeout+.
+  # @param exception [Class] exception class to be used when the read timeout
+  #   reached; used to override the configuration's +write_timeout_error+.
   #
   # @return [Integer] bytes written
   #

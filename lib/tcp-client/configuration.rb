@@ -47,13 +47,16 @@ class TCPClient
     # @option options [Boolean] :buffered, see {#buffered}
     # @option options [Boolean] :keep_alive, see {#keep_alive}
     # @option options [Boolean] :reverse_lookup, see {#reverse_lookup}
-    # @option options [Boolean] :normalize_network_errors, see {#normalize_network_errors}
+    # @option options [Boolean] :normalize_network_errors, see
+    #   {#normalize_network_errors}
     # @option options [Numeric] :connect_timeout, see {#connect_timeout}
-    # @option options [Exception] :connect_timeout_error, see {#connect_timeout_error}
+    # @option options [Exception] :connect_timeout_error, see
+    #   {#connect_timeout_error}
     # @option options [Numeric] :read_timeout, see {#read_timeout}
     # @option options [Exception] :read_timeout_error, see {#read_timeout_error}
     # @option options [Numeric] :write_timeout, see {#write_timeout}
-    # @option options [Exception] :write_timeout_error, see {#write_timeout_error}
+    # @option options [Exception] :write_timeout_error, see
+    #   {#write_timeout_error}
     # @option options [Hash<Symbol, Object>] :ssl_params, see {#ssl_params}
     #
     def initialize(options = {})
@@ -69,7 +72,8 @@ class TCPClient
     #
     # Enables/disables use of Socket-level buffers.
     #
-    # @return [true] if the connection is allowed to use internal buffers (default)
+    # @return [true] if the connection is allowed to use internal buffers
+    #   (default)
     # @return [false] if buffering is not allowed
     #
     attr_reader :buffered
@@ -81,7 +85,8 @@ class TCPClient
     #
     # Enables/disables use of Socket-level keep alive handling.
     #
-    # @return [true] if the connection is allowed to use keep alive signals (default)
+    # @return [true] if the connection is allowed to use keep alive signals
+    #   (default)
     # @return [false] if the connection should not check keep alive
     #
     attr_reader :keep_alive
@@ -93,7 +98,8 @@ class TCPClient
     #
     # Enables/disables address lookup.
     #
-    # @return [true] if the connection is allowed to lookup the address (default)
+    # @return [true] if the connection is allowed to lookup the address
+    #   (default)
     # @return [false] if the address lookup is not required
     #
     attr_reader :reverse_lookup
@@ -105,7 +111,13 @@ class TCPClient
     #
     # Enables/disables if network exceptions should be raised as {NetworkError}.
     #
-    # @return [true] if all network exceptions should be raised as {NetworkError}
+    # This allows to handle all network/socket related exceptions like
+    # `SocketError`, `OpenSSL::SSL::SSLError`, `IOError`, etc. in a uniform
+    # manner. If this option is set to true all these error cases are raised as
+    # {NetworkError} and can be easily captured.
+    #
+    # @return [true] if all network exceptions should be raised as
+    #   {NetworkError}
     # @return [false] if socket/system errors should not be normalzed (default)
     #
     attr_reader :normalize_network_errors
@@ -116,7 +128,8 @@ class TCPClient
 
     #
     # @attribute [w] timeout
-    # Shorthand to set timeout value for connect, read and write at once or to disable any timeout monitoring
+    # Shorthand to set timeout value for connect, read and write at once or to
+    # disable any timeout monitoring
     #
     # @return [Numeric] maximum time in seconds for any action
     # @return [nil] if all timeout monitoring should be disabled (default)
@@ -131,7 +144,8 @@ class TCPClient
 
     #
     # @attribute [w] timeout_error
-    # Shorthand to configure exception class raised when connect, read or write exceeded the configured timeout
+    # Shorthand to configure exception class raised when connect, read or write
+    # exceeded the configured timeout
     #
     # @return [Class] exception class raised
     #
@@ -173,7 +187,8 @@ class TCPClient
     #
     # Configures maximum time in seconds to finish a {TCPClient#read}.
     #
-    # @return [Numeric] maximum time in seconds to finish a {TCPClient#read} request
+    # @return [Numeric] maximum time in seconds to finish a {TCPClient#read}
+    #   request
     # @return [nil] if the read time should not be checked (default)
     #
     attr_reader :read_timeout
@@ -196,7 +211,8 @@ class TCPClient
     #
     # Configures maximum time in seconds to finish a {TCPClient#write}.
     #
-    # @return [Numeric] maximum time in seconds to finish a {TCPClient#write} request
+    # @return [Numeric] maximum time in seconds to finish a {TCPClient#write}
+    #   request
     # @return [nil] if the write time should not be checked (default)
     #
     attr_reader :write_timeout
