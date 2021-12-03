@@ -6,7 +6,6 @@ require 'rspec/core/rake_task'
 require 'yard'
 
 $stdout.sync = $stderr.sync = true
-
 CLOBBER << 'prj' << 'doc'
 task(:default) { exec('rake --tasks') }
 RSpec::Core::RakeTask.new { |task| task.ruby_opts = %w[-w] }
