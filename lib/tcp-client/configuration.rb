@@ -229,7 +229,7 @@ class TCPClient
 
     #
     # @attribute [w] timeout
-    # Shorthand to set maximum time in seconds for all timeut monitoring.
+    # Shorthand to set maximum time in seconds for all timeout monitoring.
     #
     # @return [Numeric] maximum time in seconds for any actwion
     # @return [nil] if all timeout monitoring should be disabled (default)
@@ -244,7 +244,7 @@ class TCPClient
 
     #
     # @attribute [w] timeout_error
-    # Shorthand to set the exception class wich will by raised by any timeut.
+    # Shorthand to set the exception class wich will by raised by any timeout.
     #
     # @return [Class] exception class raised
     #
