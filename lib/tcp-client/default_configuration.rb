@@ -7,13 +7,17 @@ class TCPClient
 
   class << self
     #
-    # @return [Configuration] used by default if no dedicated configuration was specified
+    # The default configuration.
+    # This is used by default if no dedicated configuration was specified to
+    # {.open} or {#connect}.
+    #
+    # @return [Configuration]
     #
     attr_reader :default_configuration
 
     #
-    # Configure the default configuration which is used if no dedicated
-    # configuration was specified.
+    # Configure the {.default_configuration} which is used if no dedicated
+    # configuration was specified to {.open} or {#connect}.
     #
     # @example
     #   TCPClient.configure do |cfg|
@@ -33,11 +37,19 @@ class TCPClient
   end
 
   class Configuration
-    #
-    # @return [Configuration] used by default if no dedicated configuration was specified
-    #
-    def self.default
-      TCPClient.default_configuration
+    class << self
+      #
+      # @!parse attr_reader :default
+      # @return [Configuration] used by default if no dedicated configuration
+      # was specified
+      #
+      # @see TCPClient.open
+      # @see TCPClient.with_deadline
+      # @see TCPClient#connect
+      #
+      def default
+        TCPClient.default_configuration
+      end
     end
   end
 end

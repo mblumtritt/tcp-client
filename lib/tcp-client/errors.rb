@@ -20,9 +20,12 @@ class TCPClient
   end
 
   #
-  # Raised when a an invalid timeout value was specified.
+  # Raised when an invalid timeout value was specified.
   #
   class InvalidDeadLineError < ArgumentError
+    #
+    # @param timeout [Object] the invalid value
+    #
     def initialize(timeout)
       super("invalid deadline - #{timeout}")
     end
@@ -32,6 +35,9 @@ class TCPClient
   # Raised by {Configuration} when an undefined attribute should  be set.
   #
   class UnknownAttributeError < ArgumentError
+    #
+    # @param attribute [Object] the undefined atttribute
+    #
     def initialize(attribute)
       super("unknown attribute - #{attribute}")
     end
@@ -41,6 +47,9 @@ class TCPClient
   # Raised when a given timeout exception parameter is not an exception class.
   #
   class NotAnExceptionError < TypeError
+    #
+    # @param object [Object] the invalid object
+    #
     def initialize(object)
       super("exception class required - #{object.inspect}")
     end
@@ -74,17 +83,19 @@ class TCPClient
     #
     # Initializes the instance with an optional message.
     #
-    # the message will be generated from {#action} when not specified.
+    # The message will be generated from {#action} when not specified.
+    #
     # @overload initialize
     # @overload initialize(message)
     #
-    # @param message [String, #to_s] the error message
+    # @param message [#to_s] the error message
     #
     def initialize(message = nil)
       super(message || "unable to #{action} in time")
     end
 
     #
+    # @attribute [r] action
     # @return [Symbol] the action which timed out
     #
     def action
@@ -97,7 +108,8 @@ class TCPClient
   #
   class ConnectTimeoutError < TimeoutError
     #
-    # @return [Symbol] the action which timed out: +:connect+
+    # @attribute [r] action
+    # @return [Symbol] the action which timed out: `:connect`
     #
     def action
       :connect
@@ -105,11 +117,12 @@ class TCPClient
   end
 
   #
-  # Raised by default whenever a {TCPClient.read} timed out.
+  # Raised by default whenever a {TCPClient#read} timed out.
   #
   class ReadTimeoutError < TimeoutError
     #
-    # @return [Symbol] the action which timed out: +:read+
+    # @attribute [r] action
+    # @return [Symbol] the action which timed out: :read`
     #
     def action
       :read
@@ -117,11 +130,12 @@ class TCPClient
   end
 
   #
-  # Raised by default whenever a {TCPClient.write} timed out.
+  # Raised by default whenever a {TCPClient#write} timed out.
   #
   class WriteTimeoutError < TimeoutError
     #
-    # @return [Symbol] the action which timed out: +:write+
+    # @attribute [r] action
+    # @return [Symbol] the action which timed out: `:write`
     #
     def action
       :write

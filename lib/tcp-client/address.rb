@@ -27,19 +27,24 @@ class TCPClient
     #     - a valid TCPv6 address like
     #       "[2001:16b8:5093:3500:ad77:abe6:eb88:47b6]:80"
     #
-    #   @param addr [String] address string
+    #   @example create an Address instance with a host name and port
+    #     Address.new('www.google.com:80')
     #
-    # @overload initialize(address)
-    #   Used to create a copy
+    #   @param addr [String] address containing host and port name
     #
-    #   @param address [Address]
     #
     # @overload initialize(addrinfo)
+    #
+    #   @example create an Address with an Addrinfo
+    #     Address.new(Addrinfo.tcp('www.google.com', 'http'))
     #
     #   @param addrinfo [Addrinfo] containing the addressed host and port
     #
     # @overload initialize(port)
     #   Adresses the port on the local machine.
+    #
+    #   @example create an Address for localhost on port 80
+    #     Address.new(80)
     #
     #   @param port [Integer] the addressed port
     #

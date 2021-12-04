@@ -26,7 +26,9 @@ require_relative 'tcp-client/version'
 class TCPClient
   #
   # Creates a new instance which is connected to the server on the given
-  # address and uses the given or the {.default_configuration}.
+  # `address`.
+  #
+  # If no `configuration` is given, the {.default_configuration} will be used.
   #
   # If an optional block is given, then the block's result is returned and the
   # connection will be closed when the block execution ends.
@@ -58,14 +60,17 @@ class TCPClient
 
   #
   # Yields a new instance which is connected to the server on the given
-  # address and uses the given or the {.default_configuration}.
-  # It ensures to close the connection when the block execution ends.
-  # It also limits all {#read} and {#write} actions within the block to a given
-  # time.
+  # `address`.It limits all {#read} and {#write} actions within the block to
+  # the given time.
+  #
+  # It ensures to close the connection when the block execution ends and returns
+  # the block`s result.
   #
   # This can be used to create an ad-hoc connection which is garanteed to be
-  # closed and which read/write calls should not last longer than the timeout
-  # limit.
+  # closed and which {#read}/{#write} call sequence should not last longer than
+  # the `timeout`.
+  #
+  # If no `configuration` is given, the {.default_configuration} will be used.
   #
   # @param timeout [Numeric] maximum time in seconds for all {#read} and
   #   {#write} calls within the block
@@ -77,7 +82,7 @@ class TCPClient
   # @yieldparam client [TCPClient] the connected client
   # @yieldreturn [Object] any result
   #
-  # @return [Object] the block result
+  # @return [Object] the block's result
   #
   # @see #with_deadline
   #
@@ -94,17 +99,17 @@ class TCPClient
   end
 
   #
-  # @return [Address] the address used for this client
+  # @return [Address] the address used by this client instance
   #
   attr_reader :address
 
   #
-  # @return [Configuration] the configuration used by this client.
+  # @return [Configuration] the configuration used by this client instance
   #
   attr_reader :configuration
 
   #
-  # @attribute [r] closed?
+  # @!parse attr_reader :closed?
   # @return [Boolean] true when the connection is closed, false when connected
   #
   def closed?
@@ -112,46 +117,7 @@ class TCPClient
   end
 
   #
-  # @return [String] the currently used address as text.
-  #
-  # @see Address#to_s
-  #
-  def to_s
-    @address&.to_s || ''
-  end
-
-  #
-  # Establishes a new connection to a given address.
-  #
-  # It accepts a connection-specific configuration or uses the global
-  # {.default_configuration}. The {#configuration} used by this instance will
-  # be a copy of the configuration used for this method call. This allows to
-  # configure the behavior per connection.
-  #
-  # @param address [Address, String, Addrinfo, Integer] the address to connect
-  #   to, see {Address#initialize} for valid formats
-  # @param configuration [Configuration] the {Configuration} to be used for
-  #   this instance
-  # @param timeout [Numeric] maximum time in seconds to read; used to override
-  #   the configuration's +connect_timeout+.
-  # @param exception [Class] exception class to be used when the read timeout
-  #   reached; used to override the configuration's +connect_timeout_error+.
-  #
-  # @return [self]
-  #
-  # @raise {NoOpenSSLError} if SSL should be used but OpenSSL is not avail
-  #
-  def connect(address, configuration = nil, timeout: nil, exception: nil)
-    close if @socket
-    @address = Address.new(address)
-    @configuration = (configuration || Configuration.default).dup
-    raise(NoOpenSSLError) if @configuration.ssl? && !defined?(SSLSocket)
-    @socket = create_socket(timeout, exception)
-    self
-  end
-
-  #
-  # Close the current connection.
+  # Close the current connection if connected.
   #
   # @return [self]
   #
@@ -165,24 +131,106 @@ class TCPClient
   end
 
   #
-  # Executes a block with a given overall timeout.
+  # Establishes a new connection to a given `address`.
   #
-  # When you like to ensure that a complete read/write communication sequence
-  # with the server is finished before a given amount of time you can use this
-  # method to define such a deadline.
+  # It accepts a connection-specific configuration or uses the
+  # {.default_configuration}. The {#configuration} used by this instance will
+  # be a copy of the configuration used for this method call. This allows to
+  # configure the behavior per connection.
   #
-  # @example ensure to send a welcome message and receive a 64 byte answer
+  # The optional `timeout` and `exception` parameters allow to override the
+  # `connect_timeout` and `connect_timeout_error` values.
+  #
+  # @param address [Address, String, Addrinfo, Integer] the address to connect
+  #   to, see {Address#initialize} for valid formats
+  # @param configuration [Configuration] the {Configuration} to be used for
+  #   this instance
+  # @param timeout [Numeric] maximum time in seconds to connect
+  # @param exception [Class] exception class to be used when the connect timeout
+  #   reached
+  #
+  # @return [self]
+  #
+  # @raise {NoOpenSSLError} if SSL should be used but OpenSSL is not avail
+  #
+  # @see NetworkError
+  #
+  def connect(address, configuration = nil, timeout: nil, exception: nil)
+    close if @socket
+    @address = Address.new(address)
+    @configuration = (configuration || Configuration.default).dup
+    raise(NoOpenSSLError) if @configuration.ssl? && !defined?(SSLSocket)
+    @socket = create_socket(timeout, exception)
+    self
+  end
+
+  #
+  # Flush all internal buffers (write all through).
+  #
+  # @return [self]
+  #
+  def flush
+    stem_errors { @socket&.flush }
+    self
+  end
+
+  #
+  # Read the given `nbytes` or the next available buffer from server.
+  #
+  # The optional `timeout` and `exception` parameters allow to override the
+  # `read_timeout` and `read_timeout_error` values of the used {#configuration}.
+  #
+  # @param nbytes [Integer] the number of bytes to read
+  # @param timeout [Numeric] maximum time in seconds to read
+  # @param exception [Class] exception class to be used when the read timeout
+  #   reached
+  #
+  # @return [String] the read buffer
+  #
+  # @raise [NotConnectedError] if {#connect} was not called before
+  #
+  # @see NetworkError
+  #
+  def read(nbytes = nil, timeout: nil, exception: nil)
+    raise(NotConnectedError) if closed?
+    deadline = create_deadline(timeout, configuration.read_timeout)
+    return stem_errors { @socket.read(nbytes) } unless deadline.valid?
+    exception ||= configuration.read_timeout_error
+    stem_errors(exception) do
+      @socket.read_with_deadline(nbytes, deadline, exception)
+    end
+  end
+
+  #
+  # @return [String] the currently used address as text.
+  #
+  # @see Address#to_s
+  #
+  def to_s
+    @address&.to_s || ''
+  end
+
+  #
+  # Execute a block with a given overall time limit.
+  #
+  # When you like to ensure that a complete {#read}/{#write} communication
+  # sequence with the server is finished before a given amount of time you use
+  # this method.
+  #
+  # @example ensure to send SMTP welcome message and receive a 4 byte answer
   #   answer = client.with_deadline(2.5) do
-  #     client.write('Helo')
-  #     client.read(64)
+  #     client.write('HELO')
+  #     client.read(4)
   #   end
+  #   # answer is EHLO when server speaks fluent SMPT
   #
   # @param timeout [Numeric] maximum time in seconds for all {#read} and
   #   {#write} calls within the block
   #
   # @yieldparam client [TCPClient] self
+  # @yieldreturn [Object] any result
   #
-  # @return [Object] result of the given block
+  # @return [Object] the block`s result
   #
   # @raise [NoBlockGivenError] if the block is missing
   #
@@ -197,36 +245,16 @@ class TCPClient
   end
 
   #
-  # Read the given nbytes or the next available buffer from server.
+  # Write the given `messages` to the server.
   #
-  # @param nbytes [Integer] the number of bytes to read
-  # @param timeout [Numeric] maximum time in seconds to read; used to override
-  #   the configuration's +read_timeout+.
-  # @param exception [Class] exception class to be used when the read timeout
-  #   reached; used to override the configuration's +read_timeout_error+.
+  # The optional `timeout` and `exception` parameters allow to override the
+  # `write_timeout` and `write_timeout_error` values of the used
+  # {#configuration}.
   #
-  # @return [String] buffer read
-  #
-  # @raise [NotConnectedError] if {#connect} was not called before
-  #
-  def read(nbytes = nil, timeout: nil, exception: nil)
-    raise(NotConnectedError) if closed?
-    deadline = create_deadline(timeout, configuration.read_timeout)
-    return stem_errors { @socket.read(nbytes) } unless deadline.valid?
-    exception ||= configuration.read_timeout_error
-    stem_errors(exception) do
-      @socket.read_with_deadline(nbytes, deadline, exception)
-    end
-  end
-
-  #
-  # Write the given messages to the server.
-  #
-  # @param messages [Array<String>] messages to write
-  # @param timeout [Numeric] maximum time in seconds to read; used to override
-  #   the configuration's +write_timeout+.
-  # @param exception [Class] exception class to be used when the read timeout
-  #   reached; used to override the configuration's +write_timeout_error+.
+  # @param messages [String] one or more messages to write
+  # @param timeout [Numeric] maximum time in seconds to write
+  # @param exception [Class] exception class to be used when the write timeout
+  #   reached
   #
   # @return [Integer] bytes written
   #
@@ -242,16 +270,6 @@ class TCPClient
         @socket.write_with_deadline(chunk.b, deadline, exception)
       end
     end
-  end
-
-  #
-  # Flush all internal buffers (write all through).
-  #
-  # @return [self]
-  #
-  def flush
-    stem_errors { @socket&.flush }
-    self
   end
 
   private

@@ -6,7 +6,7 @@ require 'rspec/core/rake_task'
 require 'yard'
 
 $stdout.sync = $stderr.sync = true
-CLOBBER << 'prj' << 'doc'
+CLOBBER << 'prj' << 'doc' << '.yardoc'
 task(:default) { exec('rake --tasks') }
 RSpec::Core::RakeTask.new { |task| task.ruby_opts = %w[-w] }
 YARD::Rake::YardocTask.new { |task| task.stats_options = %w[--list-undoc] }

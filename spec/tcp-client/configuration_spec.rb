@@ -182,6 +182,7 @@ RSpec.describe TCPClient::Configuration do
         read_timeout_error: TCPClient::ReadTimeoutError,
         write_timeout: 3,
         write_timeout_error: TCPClient::WriteTimeoutError,
+        normalize_network_errors: false,
         ssl_params: {
           min_version: :TLS1_2,
           max_version: :TLS1_3
