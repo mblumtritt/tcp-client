@@ -63,7 +63,7 @@ class TCPClient
     end
 
     #
-    # @return [String] text representation of self as "<host>:<port>"
+    # @return [String] text representation of self as "host:port"
     #
     def to_s
       return "[#{@hostname}]:#{@addrinfo.ip_port}" if @hostname.index(':') # IP6
