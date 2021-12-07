@@ -6,7 +6,6 @@ A TCP client implementation with working timeout support.
 - Source: [github.com](https://github.com/mblumtritt/tcp-client)
 - Help: [rubydoc.info](https://rubydoc.info/github/mblumtritt/tcp-client/main/index)
 
-
 ## Description
 
 This Gem implements a TCP client with (optional) SSL support. It is an easy to use, versatile configurable client that can correctly handle time limits. Unlike other implementations, this client respects predefined/configurable time limits for each method (`connect`, `read`, `write`). Deadlines for a sequence of read/write actions can also be monitored.

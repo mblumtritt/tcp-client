@@ -132,7 +132,7 @@ class TCPClient
         if value.respond_to?(:to_hash)
           Hash[value.to_hash]
         elsif value.respond_to?(:to_h)
-          Hash[value.to_h]
+          value.nil? ? nil : Hash[value.to_h]
         else
           value ? {} : nil
         end

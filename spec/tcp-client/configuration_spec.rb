@@ -82,7 +82,7 @@ RSpec.describe TCPClient::Configuration do
         expect(configuration.keep_alive).to be false
       end
 
-      it 'allows to configure reverse address lokup' do
+      it 'allows to configure reverse address lookup' do
         expect(configuration.reverse_lookup).to be false
       end
 
@@ -148,7 +148,7 @@ RSpec.describe TCPClient::Configuration do
       end
     end
 
-    context 'with invalid attribte' do
+    context 'with invalid attribute' do
       it 'raises an error' do
         expect { TCPClient::Configuration.new(invalid: :value) }.to raise_error(
           TCPClient::UnknownAttributeError
