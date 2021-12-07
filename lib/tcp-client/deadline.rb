@@ -2,8 +2,6 @@
 
 class TCPClient
   class Deadline
-    MONOTONIC = defined?(Process::CLOCK_MONOTONIC) ? true : false
-
     def initialize(timeout)
       timeout = timeout&.to_f
       @deadline = timeout&.positive? ? now + timeout : 0
@@ -19,7 +17,7 @@ class TCPClient
 
     private
 
-    if MONOTONIC
+    if defined?(Process::CLOCK_MONOTONIC)
       def now
         Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
