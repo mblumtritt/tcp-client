@@ -233,13 +233,13 @@ RSpec.describe TCPClient::Configuration do
         expect(config_a).to eq config_b
       end
 
-      context 'using the == opperator' do
+      context 'using the == operator' do
         it 'compares to equal' do
           expect(config_a == config_b).to be true
         end
       end
 
-      context 'using the === opperator' do
+      context 'using the === operator' do
         it 'compares to equal' do
           expect(config_a === config_b).to be true
         end
@@ -254,13 +254,13 @@ RSpec.describe TCPClient::Configuration do
         expect(config_a).not_to eq config_b
       end
 
-      context 'using the == opperator' do
+      context 'using the == operator' do
         it 'compares not to equal' do
           expect(config_a == config_b).to be false
         end
       end
 
-      context 'using the === opperator' do
+      context 'using the === operator' do
         it 'compares not to equal' do
           expect(config_a === config_b).to be false
         end

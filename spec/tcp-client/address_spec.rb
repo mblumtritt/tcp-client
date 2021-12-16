@@ -9,8 +9,8 @@ RSpec.describe TCPClient::Address do
 
       it 'points to the given port on localhost' do
         expect(address.hostname).to eq 'localhost'
+        expect(address.port).to be 42
         expect(address.to_s).to eq 'localhost:42'
-        expect(address.addrinfo.ip_port).to be 42
       end
 
       it 'uses IPv6' do
@@ -29,8 +29,9 @@ RSpec.describe TCPClient::Address do
       end
 
       it 'points to the given host and port' do
-        expect(address.hostname).to eq addrinfo.getnameinfo[0]
-        expect(address.addrinfo.ip_port).to be 42
+        expect(address.hostname).to eq 'localhost'
+        expect(address.port).to be 42
+        expect(address.to_s).to eq 'localhost:42'
       end
 
       it 'uses IPv6' do
@@ -46,30 +47,21 @@ RSpec.describe TCPClient::Address do
 
         it 'points to the given host and port' do
           expect(address.hostname).to eq 'localhost'
+          expect(address.port).to be 42
           expect(address.to_s).to eq 'localhost:42'
-          expect(address.addrinfo.ip_port).to be 42
+          expect(address.addrinfo.ip?).to be true
         end
 
-        it 'uses IPv6' do
-          expect(address.addrinfo.ip?).to be true
-          expect(address.addrinfo.ipv6?).to be true
-          expect(address.addrinfo.ipv4?).to be false
-        end
       end
 
       context 'when only a port is provided' do
-        subject(:address) { TCPClient::Address.new(':21') }
+        subject(:address) { TCPClient::Address.new(':42') }
 
         it 'points to the given port on localhost' do
-          expect(address.hostname).to eq ''
-          expect(address.to_s).to eq ':21'
-          expect(address.addrinfo.ip_port).to be 21
-        end
-
-        it 'uses IPv4' do
+          expect(address.hostname).to eq 'localhost'
+          expect(address.port).to be 42
+          expect(address.to_s).to eq 'localhost:42'
           expect(address.addrinfo.ip?).to be true
-          expect(address.addrinfo.ipv6?).to be false
-          expect(address.addrinfo.ipv4?).to be true
         end
       end
 
@@ -78,14 +70,9 @@ RSpec.describe TCPClient::Address do
 
         it 'points to the given port on localhost' do
           expect(address.hostname).to eq '::1'
+          expect(address.port).to be 42
           expect(address.to_s).to eq '[::1]:42'
-          expect(address.addrinfo.ip_port).to be 42
-        end
-
-        it 'uses IPv6' do
           expect(address.addrinfo.ip?).to be true
-          expect(address.addrinfo.ipv6?).to be true
-          expect(address.addrinfo.ipv4?).to be false
         end
       end
     end
@@ -108,13 +95,13 @@ RSpec.describe TCPClient::Address do
         expect(address_a).to eq address_b
       end
 
-      context 'using the == opperator' do
+      context 'using the == operator' do
         it 'compares to equal' do
           expect(address_a == address_b).to be true
         end
       end
 
-      context 'using the === opperator' do
+      context 'using the === operator' do
         it 'compares to equal' do
           expect(address_a === address_b).to be true
         end
@@ -129,13 +116,13 @@ RSpec.describe TCPClient::Address do
         expect(address_a).not_to eq address_b
       end
 
-      context 'using the == opperator' do
+      context 'using the == operator' do
         it 'compares not to equal' do
           expect(address_a == address_b).to be false
         end
       end
 
-      context 'using the === opperator' do
+      context 'using the === operator' do
         it 'compares not to equal' do
           expect(address_a === address_b).to be false
         end
