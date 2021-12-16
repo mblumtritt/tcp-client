@@ -2,7 +2,8 @@
 
 class TCPClient
   #
-  # Raised when a SSL connection should be establshed but the OpenSSL gem is not available.
+  # Raised when a SSL connection should be establshed but the OpenSSL gem is
+  # not available.
   #
   class NoOpenSSLError < RuntimeError
     def initialize
@@ -11,7 +12,8 @@ class TCPClient
   end
 
   #
-  # Raised when a method requires a callback block but no such block is specified.
+  # Raised when a method requires a callback block but no such block is
+  # specified.
   #
   class NoBlockGivenError < ArgumentError
     def initialize
@@ -58,15 +60,18 @@ class TCPClient
   #
   # Base exception class for all network related errors.
   #
-  # Will be raised for any system level network error when {Configuration.normalize_network_errors} is configured.
+  # Will be raised for any system level network error when
+  # {Configuration.normalize_network_errors} is configured.
   #
-  # You should catch this exception class when you like to handle any relevant {TCPClient} error.
+  # You should catch this exception class when you like to handle any relevant
+  # {TCPClient} error.
   #
   class NetworkError < StandardError
   end
 
   #
-  # Raised when a {TCPClient} instance should read/write from/to the network but is not connected.
+  # Raised when a {TCPClient} instance should read/write from/to the network
+  # but is not connected.
   #
   class NotConnectedError < NetworkError
     def initialize
@@ -77,7 +82,8 @@ class TCPClient
   #
   # Base exception class for a detected timeout.
   #
-  # You should catch this exception class when you like to handle any timeout error.
+  # You should catch this exception class when you like to handle any timeout
+  # error.
   #
   class TimeoutError < NetworkError
     #

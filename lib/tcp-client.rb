@@ -30,6 +30,14 @@ class TCPClient
   #
   # If no `configuration` is given, the {.default_configuration} will be used.
   #
+  # @overload open(address, configuration = nil)
+  #   @yieldparam client [TCPClient] the connected client
+  #
+  #   @return [Object] the block result
+  #
+  # @overload open(address, configuration = nil)
+  #   @return [TCPClient] the connected client
+  #
   # If an optional block is given, then the block's result is returned and the
   # connection will be closed when the block execution ends.
   # This can be used to create an ad-hoc connection which is garanteed to be
@@ -38,15 +46,10 @@ class TCPClient
   # If no block is giiven the connected client instance is returned.
   # This can be used as a shorthand to create & connect a client.
   #
-  # @param address [Address, String, Addrinfo, Integer] the address to connect
-  #   to, see {Address#initialize} for valid formats
+  # @param address [Address, String, Addrinfo, Integer] the target address see
+  #   {Address#initialize} for valid formats
   # @param configuration [Configuration] the {Configuration} to be used for
-  #   this instance
-  #
-  # @yieldparam client [TCPClient] the connected client
-  # @yieldreturn [Object] any result
-  #
-  # @return [Object, TCPClient] the block result or the connected client
+  #   the new instance
   #
   # @see #connect
   #
@@ -59,8 +62,8 @@ class TCPClient
   end
 
   #
-  # Yields a new instance which is connected to the server on the given
-  # `address`.It limits all {#read} and {#write} actions within the block to
+  # Yields an instance which is connected to the server on the given
+  # `address`. It limits all {#read} and {#write} actions within the block to
   # the given time.
   #
   # It ensures to close the connection when the block execution ends and returns
@@ -68,19 +71,18 @@ class TCPClient
   #
   # This can be used to create an ad-hoc connection which is garanteed to be
   # closed and which {#read}/{#write} call sequence should not last longer than
-  # the `timeout`.
+  # the `timeout` seconds.
   #
   # If no `configuration` is given, the {.default_configuration} will be used.
   #
   # @param timeout [Numeric] maximum time in seconds for all {#read} and
   #   {#write} calls within the block
-  # @param address [Address, String, Addrinfo, Integer] the address to connect
-  #   to, see {Address#initialize} for valid formats
+  # @param address [Address, String, Addrinfo, Integer] the target address see
+  #   {Address#initialize} for valid formats
   # @param configuration [Configuration] the {Configuration} to be used for
-  #   this instance
+  #   the instance
   #
   # @yieldparam client [TCPClient] the connected client
-  # @yieldreturn [Object] any result
   #
   # @return [Object] the block's result
   #
@@ -110,7 +112,7 @@ class TCPClient
 
   #
   # @!parse attr_reader :closed?
-  # @return [Boolean] true when the connection is closed, false when connected
+  # @return [Boolean] wheter the connection is closed
   #
   def closed?
     @socket.nil? || @socket.closed?
@@ -133,21 +135,19 @@ class TCPClient
   #
   # Establishes a new connection to a given `address`.
   #
-  # It accepts a connection-specific configuration or uses the
-  # {.default_configuration}. The {#configuration} used by this instance will
-  # be a copy of the configuration used for this method call. This allows to
-  # configure the behavior per connection.
+  # It accepts a connection-specific `configuration` or uses the
+  # {.default_configuration}.
   #
   # The optional `timeout` and `exception` parameters allow to override the
   # `connect_timeout` and `connect_timeout_error` values.
   #
-  # @param address [Address, String, Addrinfo, Integer] the address to connect
-  #   to, see {Address#initialize} for valid formats
+  # @param address [Address, String, Addrinfo, Integer] the target address see
+  #   {Address#initialize} for valid formats
   # @param configuration [Configuration] the {Configuration} to be used for
   #   this instance
   # @param timeout [Numeric] maximum time in seconds to connect
-  # @param exception [Class] exception class to be used when the connect timeout
-  #   reached
+  # @param exception [Class<Exception>] exception class to be used when the
+  #   connect timeout reached
   #
   # @return [self]
   #
@@ -165,7 +165,7 @@ class TCPClient
   end
 
   #
-  # Flush all internal buffers (write all through).
+  # Flushes all internal buffers (write all through).
   #
   # @return [self]
   #
@@ -182,8 +182,8 @@ class TCPClient
   #
   # @param nbytes [Integer] the number of bytes to read
   # @param timeout [Numeric] maximum time in seconds to read
-  # @param exception [Class] exception class to be used when the read timeout
-  #   reached
+  # @param exception [Class<Exception>] exception class to be used when the
+  #   read timeout reached
   #
   # @return [String] the read buffer
   #
@@ -211,7 +211,7 @@ class TCPClient
   end
 
   #
-  # Execute a block with a given overall time limit.
+  # Executes a block with a given overall time limit.
   #
   # When you like to ensure that a complete {#read}/{#write} communication
   # sequence with the server is finished before a given amount of time you use
@@ -228,7 +228,6 @@ class TCPClient
   #   {#write} calls within the block
   #
   # @yieldparam client [TCPClient] self
-  # @yieldreturn [Object] any result
   #
   # @return [Object] the block`s result
   #
@@ -245,16 +244,16 @@ class TCPClient
   end
 
   #
-  # Write the given `messages` to the server.
+  # Writes the given `messages` to the server.
   #
   # The optional `timeout` and `exception` parameters allow to override the
   # `write_timeout` and `write_timeout_error` values of the used
   # {#configuration}.
   #
-  # @param messages [String] one or more messages to write
+  # @param messages [Array<String>] one or more messages to write
   # @param timeout [Numeric] maximum time in seconds to write
-  # @param exception [Class] exception class to be used when the write timeout
-  #   reached
+  # @param exception [Class<Exception>] exception class to be used when the
+  #   write timeout reached
   #
   # @return [Integer] bytes written
   #

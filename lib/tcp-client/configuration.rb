@@ -6,24 +6,14 @@ class TCPClient
   #
   # A Configuration is used to configure the behavior of a {TCPClient} instance.
   #
-  # It allows to specify to monitor timeout, how to handle exceptions, if SSL
+  # It allows to specify the monitor timeout, how to handle exceptions, if SSL
   # should be used and to setup the underlying Socket.
   #
   class Configuration
     #
-    # @overload create(options)
-    #   Shorthand to create a new configuration with given options.
+    # Shorthand to create a new configuration.
     #
-    #   @example
-    #     config = TCPClient::Configuration.create(buffered: false)
-    #
-    #   @param options [Hash] see {#initialize} for details
-    #
-    #   @return [Configuration] the initialized configuration
-    #
-    # @overload create(&block)
-    #   Shorthand to create a new configuration within a code block.
-    #
+    # @overload create()
     #   @example
     #     config = TCPClient::Configuration.create do |cfg|
     #       cfg.buffered = false
@@ -32,7 +22,13 @@ class TCPClient
     #
     #   @yieldparam configuration {Configuration}
     #
-    #   @return [Configuration] the initialized configuration
+    # @overload create(options)
+    #   @example
+    #     config = TCPClient::Configuration.create(buffered: false)
+    #
+    #   @param options [Hash<Symbol,Object>] see {#initialize} for details
+    #
+    # @return [Configuration] the initialized configuration
     #
     def self.create(options = {})
       configuration = new(options)
@@ -43,18 +39,19 @@ class TCPClient
     #
     # Intializes the instance with given options.
     #
-    # @param options [Hash]
+    # @param options [Hash<Symbol,Object>]
     # @option options [Boolean] :buffered, see {#buffered}
     # @option options [Boolean] :keep_alive, see {#keep_alive}
     # @option options [Boolean] :reverse_lookup, see {#reverse_lookup}
     # @option options [Hash<Symbol, Object>] :ssl_params, see {#ssl_params}
     # @option options [Numeric] :connect_timeout, see {#connect_timeout}
-    # @option options [Exception] :connect_timeout_error, see
+    # @option options [Class<Exception>] :connect_timeout_error, see
     #   {#connect_timeout_error}
     # @option options [Numeric] :read_timeout, see {#read_timeout}
-    # @option options [Exception] :read_timeout_error, see {#read_timeout_error}
+    # @option options [Class<Exception>] :read_timeout_error, see
+    #   {#read_timeout_error}
     # @option options [Numeric] :write_timeout, see {#write_timeout}
-    # @option options [Exception] :write_timeout_error, see
+    # @option options [Class<Exception>] :write_timeout_error, see
     #   {#write_timeout_error}
     # @option options [Boolean] :normalize_network_errors, see
     #   {#normalize_network_errors}
@@ -75,9 +72,8 @@ class TCPClient
     #
     # Enables/disables use of Socket-level buffering
     #
-    # @return [true] if the connection is allowed to use internal buffers
-    #   (default)
-    # @return [false] if buffering is not allowed
+    # @return [Boolean] wheter the connection is allowed to use internal buffers
+    #   (default) or not
     #
     attr_reader :buffered
 
@@ -88,9 +84,8 @@ class TCPClient
     #
     # Enables/disables use of Socket-level keep alive handling.
     #
-    # @return [true] if the connection is allowed to use keep alive signals
-    #   (default)
-    # @return [false] if the connection should not check keep alive
+    # @return [Boolean] wheter the connection is allowed to use keep alive
+    #   signals (default) or not
     #
     attr_reader :keep_alive
 
@@ -101,9 +96,8 @@ class TCPClient
     #
     # Enables/disables address lookup.
     #
-    # @return [true] if the connection is allowed to lookup the address
-    #   (default)
-    # @return [false] if the address lookup is not required
+    # @return [Boolean] wheter the connection is allowed to lookup the address
+    #   (default) or not
     #
     attr_reader :reverse_lookup
 
@@ -120,7 +114,8 @@ class TCPClient
     end
 
     #
-    # Parameters used to initialize a SSL context.
+    # Parameters used to initialize a SSL context. SSL/TLS will only be used if
+    # this attribute is not `nil`.
     #
     # @return [Hash<Symbol, Object>] SSL parameters for the SSL context
     # @return [nil] if no SSL should be used (default)
@@ -161,7 +156,7 @@ class TCPClient
     # The exception class which will be raised if {TCPClient#connect} can not
     # be finished in time.
     #
-    # @return [Class] exception class raised
+    # @return [Class<Exception>] exception class raised
     # @raise [NotAnExceptionError] if given argument is not an Exception class
     #
     attr_reader :connect_timeout_error
@@ -189,7 +184,7 @@ class TCPClient
     # The exception class which will be raised if {TCPClient#read} can not be
     # finished in time.
     #
-    # @return [Class] exception class raised
+    # @return [Class<Exception>] exception class raised
     # @raise [NotAnExceptionError] if given argument is not an Exception class
     #
     attr_reader :read_timeout_error
@@ -217,7 +212,7 @@ class TCPClient
     # The exception class which will be raised if {TCPClient#write} can not be
     # finished in time.
     #
-    # @return [Class] exception class raised
+    # @return [Class<Exception>] exception class raised
     # @raise [NotAnExceptionError] if given argument is not an Exception class
     #
     attr_reader :write_timeout_error
@@ -244,9 +239,10 @@ class TCPClient
 
     #
     # @attribute [w] timeout_error
-    # Shorthand to set the exception class wich will by raised by any timeout.
+    # Shorthand to set the exception class wich will by raised by any reached
+    # timeout.
     #
-    # @return [Class] exception class raised
+    # @return [Class<Exception>] exception class raised
     #
     # @raise [NotAnExceptionError] if given argument is not an Exception class
     #
@@ -270,9 +266,8 @@ class TCPClient
     # manner. If this option is set to true all these error cases are raised as
     # {NetworkError} and can be easily captured.
     #
-    # @return [true] if all network exceptions should be raised as
-    #   {NetworkError}
-    # @return [false] if socket/system errors should not be normalzed (default)
+    # @return [Boolean] wheter all network exceptions should be raised as
+    #   {NetworkError}, or not (default)
     #
     attr_reader :normalize_network_errors
 

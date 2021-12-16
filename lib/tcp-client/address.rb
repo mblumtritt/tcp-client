@@ -71,7 +71,9 @@ class TCPClient
     end
 
     #
-    # @return [Hash] containing the host and port
+    # Convert `self` to a Hash containing host and port attribute.
+    #
+    # @return [Hash] host and port
     #
     def to_h
       { host: @hostname, port: @addrinfo.ip_port }
