@@ -63,11 +63,18 @@ class TCPClient
     end
 
     #
+    # @attribute [r] port
+    # @return [Integer] the port number
+    #
+    def port
+      @addrinfo.ip_port
+    end
+
+    #
     # @return [String] text representation of self as "host:port"
     #
     def to_s
-      return "[#{@hostname}]:#{@addrinfo.ip_port}" if @hostname.index(':') # IP6
-      "#{@hostname}:#{@addrinfo.ip_port}"
+      hostname.index(':') ? "[#{hostname}]:#{port}" : "#{hostname}:#{port}"
     end
 
     #
@@ -76,7 +83,7 @@ class TCPClient
     # @return [Hash] host and port
     #
     def to_h
-      { host: @hostname, port: @addrinfo.ip_port }
+      { host: hostname, port: port }
     end
 
     # @!visibility private
