@@ -2,7 +2,7 @@
 
 class TCPClient
   #
-  # Raised when a SSL connection should be establshed but the OpenSSL gem is
+  # Raised when a SSL connection should be established but the OpenSSL gem is
   # not available.
   #
   class NoOpenSSLError < RuntimeError
@@ -38,7 +38,7 @@ class TCPClient
   #
   class UnknownAttributeError < ArgumentError
     #
-    # @param attribute [Object] the undefined atttribute
+    # @param attribute [Object] the undefined attribute
     #
     def initialize(attribute)
       super("unknown attribute - #{attribute}")

@@ -41,7 +41,7 @@ class TCPClient
     #   @param addrinfo [Addrinfo] containing the addressed host and port
     #
     # @overload initialize(port)
-    #   Adresses the port on the local machine.
+    #   Addresses the port on the local machine.
     #
     #   @example create an Address for localhost on port 80
     #     Address.new(80)

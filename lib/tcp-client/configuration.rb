@@ -37,7 +37,7 @@ class TCPClient
     end
 
     #
-    # Intializes the instance with given options.
+    # Initializes the instance with given options.
     #
     # @param options [Hash<Symbol,Object>]
     # @option options [Boolean] :buffered, see {#buffered}
@@ -72,8 +72,8 @@ class TCPClient
     #
     # Enables/disables use of Socket-level buffering
     #
-    # @return [Boolean] wheter the connection is allowed to use internal buffers
-    #   (default) or not
+    # @return [Boolean] whether the connection is allowed to use internal
+    #   buffers (default) or not
     #
     attr_reader :buffered
 
@@ -84,7 +84,7 @@ class TCPClient
     #
     # Enables/disables use of Socket-level keep alive handling.
     #
-    # @return [Boolean] wheter the connection is allowed to use keep alive
+    # @return [Boolean] whether the connection is allowed to use keep alive
     #   signals (default) or not
     #
     attr_reader :keep_alive
@@ -96,7 +96,7 @@ class TCPClient
     #
     # Enables/disables address lookup.
     #
-    # @return [Boolean] wheter the connection is allowed to lookup the address
+    # @return [Boolean] whether the connection is allowed to lookup the address
     #   (default) or not
     #
     attr_reader :reverse_lookup
@@ -107,7 +107,7 @@ class TCPClient
 
     #
     # @!parse attr_reader :ssl?
-    # @return [Boolean] wheter SSL is configured, see {#ssl_params}
+    # @return [Boolean] whether SSL is configured, see {#ssl_params}
     #
     def ssl?
       @ssl_params ? true : false
@@ -226,7 +226,7 @@ class TCPClient
     # @attribute [w] timeout
     # Shorthand to set maximum time in seconds for all timeout monitoring.
     #
-    # @return [Numeric] maximum time in seconds for any actwion
+    # @return [Numeric] maximum time in seconds for any action
     # @return [nil] if all timeout monitoring should be disabled (default)
     #
     # @see #connect_timeout
@@ -239,7 +239,7 @@ class TCPClient
 
     #
     # @attribute [w] timeout_error
-    # Shorthand to set the exception class wich will by raised by any reached
+    # Shorthand to set the exception class which will by raised by any reached
     # timeout.
     #
     # @return [Class<Exception>] exception class raised
@@ -266,7 +266,7 @@ class TCPClient
     # manner. If this option is set to true all these error cases are raised as
     # {NetworkError} and can be easily captured.
     #
-    # @return [Boolean] wheter all network exceptions should be raised as
+    # @return [Boolean] whether all network exceptions should be raised as
     #   {NetworkError}, or not (default)
     #
     attr_reader :normalize_network_errors

@@ -40,10 +40,10 @@ class TCPClient
   #
   # If an optional block is given, then the block's result is returned and the
   # connection will be closed when the block execution ends.
-  # This can be used to create an ad-hoc connection which is garanteed to be
+  # This can be used to create an ad-hoc connection which is guaranteed to be
   # closed.
   #
-  # If no block is giiven the connected client instance is returned.
+  # If no block is given the connected client instance is returned.
   # This can be used as a shorthand to create & connect a client.
   #
   # @param address [Address, String, Addrinfo, Integer] the target address see
@@ -67,9 +67,9 @@ class TCPClient
   # the given time.
   #
   # It ensures to close the connection when the block execution ends and returns
-  # the block`s result.
+  # the block's result.
   #
-  # This can be used to create an ad-hoc connection which is garanteed to be
+  # This can be used to create an ad-hoc connection which is guaranteed to be
   # closed and which {#read}/{#write} call sequence should not last longer than
   # the `timeout` seconds.
   #
@@ -112,7 +112,7 @@ class TCPClient
 
   #
   # @!parse attr_reader :closed?
-  # @return [Boolean] wheter the connection is closed
+  # @return [Boolean] whether the connection is closed
   #
   def closed?
     @socket.nil? || @socket.closed?
@@ -121,7 +121,7 @@ class TCPClient
   #
   # Close the current connection if connected.
   #
-  # @return [self]
+  # @return [TCPClient] itself
   #
   def close
     @socket&.close
@@ -149,7 +149,7 @@ class TCPClient
   # @param exception [Class<Exception>] exception class to be used when the
   #   connect timeout reached
   #
-  # @return [self]
+  # @return [TCPClient] itself
   #
   # @raise {NoOpenSSLError} if SSL should be used but OpenSSL is not avail
   #
@@ -167,7 +167,7 @@ class TCPClient
   #
   # Flushes all internal buffers (write all through).
   #
-  # @return [self]
+  # @return [TCPClient] itself
   #
   def flush
     stem_errors { @socket&.flush }
@@ -229,7 +229,7 @@ class TCPClient
   #
   # @yieldparam client [TCPClient] self
   #
-  # @return [Object] the block`s result
+  # @return [Object] the block's result
   #
   # @raise [NoBlockGivenError] if the block is missing
   #
