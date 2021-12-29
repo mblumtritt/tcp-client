@@ -133,7 +133,7 @@ class TCPClient
   end
 
   #
-  # Establishes a new connection to a given `address`.
+  # Establishes a new connection to a server on given `address`.
   #
   # It accepts a connection-specific `configuration` or uses the
   # {.default_configuration}.
@@ -141,7 +141,7 @@ class TCPClient
   # The optional `timeout` and `exception` parameters allow to override the
   # `connect_timeout` and `connect_timeout_error` values.
   #
-  # @param address [Address, String, Addrinfo, Integer] the target address see
+  # @param address [Address, String, Addrinfo, Integer] the target address, see
   #   {Address#initialize} for valid formats
   # @param configuration [Configuration] the {Configuration} to be used for
   #   this instance
@@ -165,7 +165,7 @@ class TCPClient
   end
 
   #
-  # Flushes all internal buffers (write all through).
+  # Flushes all internal buffers (write all buffered data).
   #
   # @return [TCPClient] itself
   #
@@ -258,6 +258,8 @@ class TCPClient
   # @return [Integer] bytes written
   #
   # @raise [NotConnectedError] if {#connect} was not called before
+  #
+  # @see NetworkError
   #
   def write(*messages, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?

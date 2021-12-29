@@ -26,7 +26,7 @@ class TCPClient
     #   @example
     #     config = TCPClient::Configuration.create(buffered: false)
     #
-    #   @param options [Hash<Symbol,Object>] see {#initialize} for details
+    #   @param options [{Symbol => Object}] see {#initialize} for details
     #
     # @return [Configuration] the initialized configuration
     #
@@ -39,11 +39,11 @@ class TCPClient
     #
     # Initializes the instance with given options.
     #
-    # @param options [Hash<Symbol,Object>]
+    # @param options [{Symbol => Object}]
     # @option options [Boolean] :buffered, see {#buffered}
     # @option options [Boolean] :keep_alive, see {#keep_alive}
     # @option options [Boolean] :reverse_lookup, see {#reverse_lookup}
-    # @option options [Hash<Symbol, Object>] :ssl_params, see {#ssl_params}
+    # @option options [{Symbol => Object}] :ssl_params, see {#ssl_params}
     # @option options [Numeric] :connect_timeout, see {#connect_timeout}
     # @option options [Class<Exception>] :connect_timeout_error, see
     #   {#connect_timeout_error}
@@ -117,7 +117,7 @@ class TCPClient
     # Parameters used to initialize a SSL context. SSL/TLS will only be used if
     # this attribute is not `nil`.
     #
-    # @return [Hash<Symbol, Object>] SSL parameters for the SSL context
+    # @return [{Symbol => Object}] SSL parameters for the SSL context
     # @return [nil] if no SSL should be used (default)
     #
     attr_reader :ssl_params
@@ -276,9 +276,7 @@ class TCPClient
     end
 
     #
-    # Convert `self` to a Hash containing all attributes.
-    #
-    # @return [Hash<Symbol, Object>]
+    # @return [{Symbol => Object}] Hash containing all attributes
     #
     # @see #initialize
     #
