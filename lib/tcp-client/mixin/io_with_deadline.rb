@@ -13,25 +13,30 @@ module IOWithDeadlineMixin # :nodoc:
     end
   end
 
-  def read_with_deadline(bytes_to_read, deadline, exception)
+  def read_with_deadline(nbytes, deadline, exception)
     raise(exception) unless deadline.remaining_time
-    if bytes_to_read.nil?
-      return(
-        with_deadline(deadline, exception) do
-          read_nonblock(65_536, exception: false)
-        end
-      )
+    if nbytes.nil?
+      return read_next(deadline, exception) if @buf.nil?
+      result, @buf = @buf, nil
+      return result
     end
-    result = ''.b
-    while result.bytesize < bytes_to_read
-      read =
-        with_deadline(deadline, exception) do
-          read_nonblock(bytes_to_read - result.bytesize, exception: false)
-        end
-      next result += read if read
-      close
-      break
-    end
+    return ''.b if nbytes.zero?
+    @buf ||= read_next(deadline, exception).b
+    @buf << read_next(deadline, exception) while @buf.bytesize < nbytes
+    result = @buf.byteslice(0, nbytes)
+    rest = @buf.bytesize - nbytes
+    @buf = rest.zero? ? nil : @buf.byteslice(nbytes, rest)
+    result
+  end
+
+  def readto_with_deadline(sep, deadline, exception)
+    raise(exception) unless deadline.remaining_time
+    @buf ||= read_next(deadline, exception).b
+    @buf << read_next(deadline, exception) while (index = @buf.index(sep)).nil?
+    index += sep.bytesize
+    result = @buf.byteslice(0, index)
+    rest = @buf.bytesize - result.bytesize
+    @buf = rest.zero? ? nil : @buf.byteslice(index, rest)
     result
   end
 
@@ -44,9 +49,16 @@ module IOWithDeadlineMixin # :nodoc:
         with_deadline(deadline, exception) do
           write_nonblock(data, exception: false)
         end
-      result += written
-      return result if result >= size
+      (result += written) >= size and return result
       data = data.byteslice(written, data.bytesize - written)
+    end
+  end
+
+  private
+
+  def read_next(deadline, exception)
+    with_deadline(deadline, exception) do
+      read_nonblock(65_536, exception: false)
     end
   end
 

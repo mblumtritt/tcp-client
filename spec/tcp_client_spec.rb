@@ -274,11 +274,11 @@ RSpec.describe TCPClient do
           it 'reads chunk by chunk' do
             expect_any_instance_of(::Socket).to receive(:read_nonblock)
               .once
-              .with(data_size * 2, exception: false)
+              .with(instance_of(Integer), exception: false)
               .and_return(data)
             expect_any_instance_of(::Socket).to receive(:read_nonblock)
               .once
-              .with(data_size, exception: false)
+              .with(instance_of(Integer), exception: false)
               .and_return(data)
             expect(client.read(data_size * 2, timeout: 10)).to eq data * 2
           end
@@ -463,20 +463,16 @@ RSpec.describe TCPClient do
           .with(kind_of(String), exception: false)
         expect_any_instance_of(::Socket).to receive(:read_nonblock)
           .once
-          .with(12, exception: false)
-          .and_return('123456789012')
+          .with(instance_of(Integer), exception: false)
+          .and_return('123456789012abcdefgAB')
         expect_any_instance_of(::Socket).to receive(:write_nonblock)
           .once
           .with('123456', exception: false)
           .and_return(6)
         expect_any_instance_of(::Socket).to receive(:read_nonblock)
           .once
-          .with(7, exception: false)
-          .and_return('abcdefg')
-        expect_any_instance_of(::Socket).to receive(:read_nonblock)
-          .once
-          .with(7, exception: false)
-          .and_return('ABCDEFG')
+          .with(instance_of(Integer), exception: false)
+          .and_return('CDEFG')
         expect_any_instance_of(::Socket).to receive(:write_nonblock)
           .once
           .with('abc', exception: false)
