@@ -15,28 +15,28 @@ module IOWithDeadlineMixin # :nodoc:
 
   def read_with_deadline(nbytes, deadline, exception)
     raise(exception) unless deadline.remaining_time
-    if nbytes.nil?
-      return read_next(deadline, exception) if @buf.nil?
-      result, @buf = @buf, nil
-      return result
-    end
+    return fetch_avail(deadline, exception) if nbytes.nil?
     return ''.b if nbytes.zero?
-    @buf ||= read_next(deadline, exception).b
-    @buf << read_next(deadline, exception) while @buf.bytesize < nbytes
-    result = @buf.byteslice(0, nbytes)
-    rest = @buf.bytesize - nbytes
-    @buf = rest.zero? ? nil : @buf.byteslice(nbytes, rest)
-    result
+    @buf ||= ''.b
+    while @buf.bytesize < nbytes
+      read = fetch_next(deadline, exception) and next @buf << read
+      close
+      break
+    end
+    fetch_buffer_slice(nbytes)
   end
 
   def readto_with_deadline(sep, deadline, exception)
     raise(exception) unless deadline.remaining_time
-    @buf ||= read_next(deadline, exception).b
-    @buf << read_next(deadline, exception) while (index = @buf.index(sep)).nil?
-    index += sep.bytesize
-    result = @buf.byteslice(0, index)
-    rest = @buf.bytesize - result.bytesize
-    @buf = rest.zero? ? nil : @buf.byteslice(index, rest)
+    @buf ||= ''.b
+    while (index = @buf.index(sep)).nil?
+      read = fetch_next(deadline, exception) and next @buf << read
+      close
+      break
+    end
+    index = @buf.index(sep) and return fetch_buffer_slice(index + sep.bytesize)
+    result = @buf
+    @buf = nil
     result
   end
 
@@ -56,7 +56,25 @@ module IOWithDeadlineMixin # :nodoc:
 
   private
 
-  def read_next(deadline, exception)
+  def fetch_avail(deadline, exception)
+    if @buf.nil?
+      result = fetch_next(deadline, exception) and return result
+      close
+      return ''.b
+    end
+    result = @buf
+    @buf = nil
+    result
+  end
+
+  def fetch_buffer_slice(size)
+    result = @buf.byteslice(0, size)
+    rest = @buf.bytesize - result.bytesize
+    @buf = rest.zero? ? nil : @buf.byteslice(size, rest)
+    result
+  end
+
+  def fetch_next(deadline, exception)
     with_deadline(deadline, exception) do
       read_nonblock(65_536, exception: false)
     end

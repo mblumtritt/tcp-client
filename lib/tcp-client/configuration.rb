@@ -56,7 +56,6 @@ class TCPClient
     # @option options [Boolean] :normalize_network_errors, see
     #   {#normalize_network_errors}
     #
-    #
     def initialize(options = {})
       @buffered = @keep_alive = @reverse_lookup = true
       self.timeout = @ssl_params = nil

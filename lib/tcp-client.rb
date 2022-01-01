@@ -16,12 +16,15 @@ require_relative 'tcp-client/version'
 # terminate before given time limits - or raise an exception.
 #
 # @example request to Google.com and limit network interactions to 1.5 seconds
-#   TCPClient.with_deadline(1.5, 'www.google.com:443') do |client|
-#     client.write("GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n")
-#     client.read(12)
-#   end
-#   # => "HTTP/1.1 200"
+#   # create a configuration to use at least TLS 1.2
+#   cfg = TCPClient::Configuration.create(ssl_params: {min_version: :TLS1_2})
 #
+#   response =
+#     TCPClient.with_deadline(1.5, 'www.google.com:443', cfg) do |client|
+#       client.write("GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n") #=> 40
+#       client.readline("\r\n\r\n") #=> see response
+#     end
+#   # response contains the returned message and header
 #
 class TCPClient
   #
@@ -55,7 +58,7 @@ class TCPClient
   #
   def self.open(address, configuration = nil)
     client = new
-    client.connect(Address.new(address), configuration)
+    client.connect(address, configuration)
     block_given? ? yield(client) : client
   ensure
     client.close if block_given?
@@ -91,7 +94,6 @@ class TCPClient
   def self.with_deadline(timeout, address, configuration = nil)
     client = nil
     raise(NoBlockGivenError) unless block_given?
-    address = Address.new(address)
     client = new
     client.with_deadline(timeout) do
       yield(client.connect(address, configuration))
@@ -157,9 +159,9 @@ class TCPClient
   #
   def connect(address, configuration = nil, timeout: nil, exception: nil)
     close if @socket
-    @address = Address.new(address)
     @configuration = (configuration || Configuration.default).dup
     raise(NoOpenSSLError) if @configuration.ssl? && !defined?(SSLSocket)
+    @address = stem_errors { Address.new(address) }
     @socket = create_socket(timeout, exception)
     self
   end
@@ -201,16 +203,35 @@ class TCPClient
     end
   end
 
-  def readline(sep = $/, chomp: false, timeout: nil, exception: nil)
+  #
+  # Reads the next line from server.
+  #
+  # The standard record separator is used as `separator`.
+  #
+  # The optional `timeout` and `exception` parameters allow to override the
+  # `read_timeout` and `read_timeout_error` values of the used {#configuration}.
+  #
+  # @param separator [String] the line separator to be used
+  # @param timeout [Numeric] maximum time in seconds to read
+  # @param exception [Class<Exception>] exception class to be used when the
+  #   read timeout reached
+  #
+  # @return [String] the read line
+  #
+  # @raise [NotConnectedError] if {#connect} was not called before
+  #
+  # @see NetworkError
+  #
+  def readline(separator = $/, chomp: false, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?
     deadline = create_deadline(timeout, configuration.read_timeout)
     unless deadline.valid?
-      return stem_errors { @socket.readline(sep, chomp: chomp) }
+      return stem_errors { @socket.readline(separator, chomp: chomp) }
     end
     exception ||= configuration.read_timeout_error
     line =
       stem_errors(exception) do
-        @socket.readto_with_deadline(sep, deadline, exception)
+        @socket.readto_with_deadline(separator, deadline, exception)
       end
     chomp ? line.chomp : line
   end
