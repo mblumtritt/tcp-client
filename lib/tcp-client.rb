@@ -201,6 +201,20 @@ class TCPClient
     end
   end
 
+  def readline(sep = $/, chomp: false, timeout: nil, exception: nil)
+    raise(NotConnectedError) if closed?
+    deadline = create_deadline(timeout, configuration.read_timeout)
+    unless deadline.valid?
+      return stem_errors { @socket.readline(sep, chomp: chomp) }
+    end
+    exception ||= configuration.read_timeout_error
+    line =
+      stem_errors(exception) do
+        @socket.readto_with_deadline(sep, deadline, exception)
+      end
+    chomp ? line.chomp : line
+  end
+
   #
   # @return [String] the currently used address as text.
   #
