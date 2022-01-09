@@ -13,25 +13,30 @@ module IOWithDeadlineMixin # :nodoc:
     end
   end
 
-  def read_with_deadline(bytes_to_read, deadline, exception)
+  def read_with_deadline(nbytes, deadline, exception)
     raise(exception) unless deadline.remaining_time
-    if bytes_to_read.nil?
-      return(
-        with_deadline(deadline, exception) do
-          read_nonblock(65_536, exception: false)
-        end
-      )
-    end
-    result = ''.b
-    while result.bytesize < bytes_to_read
-      read =
-        with_deadline(deadline, exception) do
-          read_nonblock(bytes_to_read - result.bytesize, exception: false)
-        end
-      next result += read if read
+    return fetch_avail(deadline, exception) if nbytes.nil?
+    return ''.b if nbytes.zero?
+    @buf ||= ''.b
+    while @buf.bytesize < nbytes
+      read = fetch_next(deadline, exception) and next @buf << read
       close
       break
     end
+    fetch_buffer_slice(nbytes)
+  end
+
+  def readto_with_deadline(sep, deadline, exception)
+    raise(exception) unless deadline.remaining_time
+    @buf ||= ''.b
+    while (index = @buf.index(sep)).nil?
+      read = fetch_next(deadline, exception) and next @buf << read
+      close
+      break
+    end
+    index = @buf.index(sep) and return fetch_buffer_slice(index + sep.bytesize)
+    result = @buf
+    @buf = nil
     result
   end
 
@@ -44,9 +49,34 @@ module IOWithDeadlineMixin # :nodoc:
         with_deadline(deadline, exception) do
           write_nonblock(data, exception: false)
         end
-      result += written
-      return result if result >= size
+      (result += written) >= size and return result
       data = data.byteslice(written, data.bytesize - written)
+    end
+  end
+
+  private
+
+  def fetch_avail(deadline, exception)
+    if @buf.nil?
+      result = fetch_next(deadline, exception) and return result
+      close
+      return ''.b
+    end
+    result = @buf
+    @buf = nil
+    result
+  end
+
+  def fetch_buffer_slice(size)
+    result = @buf.byteslice(0, size)
+    rest = @buf.bytesize - result.bytesize
+    @buf = rest.zero? ? nil : @buf.byteslice(size, rest)
+    result
+  end
+
+  def fetch_next(deadline, exception)
+    with_deadline(deadline, exception) do
+      read_nonblock(65_536, exception: false)
     end
   end
 
