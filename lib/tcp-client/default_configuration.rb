@@ -41,7 +41,7 @@ class TCPClient
       #
       # @!parse attr_reader :default
       # @return [Configuration] used by default if no dedicated configuration
-      # was specified
+      #   was specified
       #
       # @see TCPClient.open
       # @see TCPClient.with_deadline

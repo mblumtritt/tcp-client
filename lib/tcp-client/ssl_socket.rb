@@ -30,7 +30,7 @@ class TCPClient
       ::OpenSSL::SSL::SSLContext.new.tap do |ctx|
         ctx.set_params(ssl_params)
         ctx.session_cache_mode = CONTEXT_CACHE_MODE
-        ctx.session_new_cb = proc { |_, sess| @new_session = sess }
+        ctx.session_new_cb = proc { |_, session| @new_session = session }
       end
     end
 

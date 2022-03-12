@@ -189,7 +189,7 @@ RSpec.describe TCPClient do
           )
           result = client.connect('localhost:1234', configuration, timeout: 10)
 
-          expect(client).to be client
+          expect(result).to be client
         end
 
         it 'is not closed' do

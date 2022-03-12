@@ -13,7 +13,7 @@ require_relative 'tcp-client/version'
 # Client class to communicate with a server via TCP w/o SSL.
 #
 # All connect/read/write actions can be monitored to ensure that all actions
-# terminate before given time limits - or raise an exception.
+# terminate before given time limit - or raise an exception.
 #
 # @example request to Google.com and limit network interactions to 1.5 seconds
 #   # create a configuration to use at least TLS 1.2
