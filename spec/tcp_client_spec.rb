@@ -773,7 +773,7 @@ RSpec.describe TCPClient do
         #     :set_params
         #   )
         #   .once
-        #   .with(ssl_version: :TLSv1_2)
+        #   .with(max_version: :TLS1_3, min_version: :TLS1_2)
         #   .and_call_original
         expect_any_instance_of(::OpenSSL::SSL::SSLSocket).to receive(
             :sync_close=

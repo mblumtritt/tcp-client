@@ -344,7 +344,8 @@ class TCPClient
       IOError,
       SocketError
     ].tap do |errors|
-      errors << ::OpenSSL::SSL::SSLError if defined?(::OpenSSL::SSL::SSLError)
-    end.freeze
+        errors << ::OpenSSL::SSL::SSLError if defined?(::OpenSSL::SSL::SSLError)
+      end
+      .freeze
   private_constant(:NETWORK_ERRORS)
 end

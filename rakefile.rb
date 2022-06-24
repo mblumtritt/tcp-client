@@ -11,5 +11,6 @@ CLEAN << '.yardoc'
 CLOBBER << 'prj' << 'doc'
 
 task(:default) { exec('rake --tasks') }
+task(test: :spec)
 RSpec::Core::RakeTask.new { |task| task.ruby_opts = %w[-w] }
 YARD::Rake::YardocTask.new { |task| task.stats_options = %w[--list-undoc] }
