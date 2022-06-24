@@ -4,40 +4,35 @@ class TCPClient
   module IOWithDeadlineMixin
     def self.included(mod)
       methods = mod.instance_methods
-      if methods.index(:wait_writable) && methods.index(:wait_readable)
-        mod.include(ViaWaitMethod)
-      elsif methods.index(:to_io)
-        mod.include(ViaIOWaitMethod)
-      else
-        mod.include(ViaSelect)
-      end
+      return if methods.index(:wait_writable) && methods.index(:wait_readable)
+      mod.include(methods.index(:to_io) ? WaitWithIO : WaitWithSelect)
     end
 
     def read_with_deadline(nbytes, deadline, exception)
       raise(exception) unless deadline.remaining_time
       return fetch_avail(deadline, exception) if nbytes.nil?
       return ''.b if nbytes.zero?
-      @buf ||= ''.b
-      while @buf.bytesize < nbytes
-        read = fetch_next(deadline, exception) and next @buf << read
+      @read_buffer ||= ''.b
+      while @read_buffer.bytesize < nbytes
+        read = fetch_next(deadline, exception) and next @read_buffer << read
         close
         break
       end
-      fetch_buffer_slice(nbytes)
+      fetch_slice(nbytes)
     end
 
-    def readto_with_deadline(sep, deadline, exception)
+    def read_to_with_deadline(sep, deadline, exception)
       raise(exception) unless deadline.remaining_time
-      @buf ||= ''.b
-      while (index = @buf.index(sep)).nil?
-        read = fetch_next(deadline, exception) and next @buf << read
+      @read_buffer ||= ''.b
+      while @read_buffer.index(sep).nil?
+        read = fetch_next(deadline, exception) and next @read_buffer << read
         close
         break
       end
-      index = @buf.index(sep)
-      return fetch_buffer_slice(index + sep.bytesize) if index
-      result = @buf
-      @buf = nil
+      index = @read_buffer.index(sep)
+      return fetch_slice(index + sep.bytesize) if index
+      result = @read_buffer
+      @read_buffer = nil
       result
     end
 
@@ -58,20 +53,18 @@ class TCPClient
     private
 
     def fetch_avail(deadline, exception)
-      if @buf.nil?
-        result = fetch_next(deadline, exception) and return result
+      if (result = @read_buffer || fetch_next(deadline, exception)).nil?
         close
         return ''.b
       end
-      result = @buf
-      @buf = nil
+      @read_buffer = nil
       result
     end
 
-    def fetch_buffer_slice(size)
-      result = @buf.byteslice(0, size)
-      rest = @buf.bytesize - result.bytesize
-      @buf = rest.zero? ? nil : @buf.byteslice(size, rest)
+    def fetch_slice(size)
+      result = @read_buffer.byteslice(0, size)
+      rest = @read_buffer.bytesize - result.bytesize
+      @read_buffer = rest.zero? ? nil : @read_buffer.byteslice(size, rest)
       result
     end
 
@@ -81,68 +74,44 @@ class TCPClient
       end
     end
 
-    module ViaWaitMethod
-      private def with_deadline(deadline, exception)
-        loop do
-          case ret = yield
-          when :wait_writable
-            remaining_time = deadline.remaining_time or raise(exception)
-            raise(exception) if wait_writable(remaining_time).nil?
-          when :wait_readable
-            remaining_time = deadline.remaining_time or raise(exception)
-            raise(exception) if wait_readable(remaining_time).nil?
-          else
-            return ret
-          end
+    def with_deadline(deadline, exception)
+      loop do
+        case ret = yield
+        when :wait_writable
+          remaining_time = deadline.remaining_time or raise(exception)
+          raise(exception) if wait_writable(remaining_time).nil?
+        when :wait_readable
+          remaining_time = deadline.remaining_time or raise(exception)
+          raise(exception) if wait_readable(remaining_time).nil?
+        else
+          return ret
         end
-      rescue Errno::ETIMEDOUT
-        raise(exception)
+      end
+    rescue Errno::ETIMEDOUT
+      raise(exception)
+    end
+
+    module WaitWithIO
+      def wait_writable(remaining_time)
+        to_io.wait_writable(remaining_time)
+      end
+
+      def wait_readable(remaining_time)
+        to_io.wait_readable(remaining_time)
       end
     end
 
-    module ViaIOWaitMethod
-      private def with_deadline(deadline, exception)
-        loop do
-          case ret = yield
-          when :wait_writable
-            remaining_time = deadline.remaining_time or raise(exception)
-            raise(exception) if to_io.wait_writable(remaining_time).nil?
-          when :wait_readable
-            remaining_time = deadline.remaining_time or raise(exception)
-            raise(exception) if to_io.wait_readable(remaining_time).nil?
-          else
-            return ret
-          end
-        end
-      rescue Errno::ETIMEDOUT
-        raise(exception)
+    module WaitWithSelect
+      def wait_writable(remaining_time)
+        ::IO.select(nil, [self], nil, remaining_time)
+      end
+
+      def wait_readable(remaining_time)
+        ::IO.select([self], nil, nil, remaining_time)
       end
     end
 
-    module ViaSelect
-      private def with_deadline(deadline, exception)
-        loop do
-          case ret = yield
-          when :wait_writable
-            remaining_time = deadline.remaining_time or raise(exception)
-            if ::IO.select(nil, [self], nil, remaining_time).nil?
-              raise(exception)
-            end
-          when :wait_readable
-            remaining_time = deadline.remaining_time or raise(exception)
-            if ::IO.select([self], nil, nil, remaining_time).nil?
-              raise(exception)
-            end
-          else
-            return ret
-          end
-        end
-      rescue Errno::ETIMEDOUT
-        raise(exception)
-      end
-    end
-
-    private_constant(:ViaWaitMethod, :ViaIOWaitMethod, :ViaSelect)
+    private_constant(:WaitWithIO, :WaitWithSelect)
   end
 
   private_constant(:IOWithDeadlineMixin)

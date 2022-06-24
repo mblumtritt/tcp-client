@@ -231,7 +231,7 @@ class TCPClient
     exception ||= configuration.read_timeout_error
     line =
       stem_errors(exception) do
-        @socket.readto_with_deadline(separator, deadline, exception)
+        @socket.read_to_with_deadline(separator, deadline, exception)
       end
     chomp ? line.chomp : line
   end
