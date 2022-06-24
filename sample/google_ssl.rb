@@ -22,7 +22,7 @@ cfg =
 response =
   TCPClient.with_deadline(1.5, 'www.google.com:443', cfg) do |client|
     client.write("GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n") #=> 40
-    client.readline("\r\n\r\n") #=> see response
+    client.readline("\r\n\r\n") #=> header, see response
   end
 
 puts(response)

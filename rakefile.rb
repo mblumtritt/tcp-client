@@ -7,12 +7,9 @@ require 'yard'
 
 $stdout.sync = $stderr.sync = true
 
-CLEAN << 'prj' << 'doc'
-
-CLOBBER << '.yardoc'
+CLEAN << '.yardoc'
+CLOBBER << 'prj' << 'doc'
 
 task(:default) { exec('rake --tasks') }
-
 RSpec::Core::RakeTask.new { |task| task.ruby_opts = %w[-w] }
-
 YARD::Rake::YardocTask.new { |task| task.stats_options = %w[--list-undoc] }

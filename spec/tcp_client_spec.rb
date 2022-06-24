@@ -130,11 +130,11 @@ RSpec.describe TCPClient do
       expect(client.configuration).to be configuration
     end
 
-    it 'failes when read is called' do
+    it 'fails when read is called' do
       expect { client.read(42) }.to raise_error(TCPClient::NotConnectedError)
     end
 
-    it 'failes when write is called' do
+    it 'fails when write is called' do
       expect { client.write('?!') }.to raise_error(TCPClient::NotConnectedError)
     end
 
@@ -147,12 +147,6 @@ RSpec.describe TCPClient do
       expect_any_instance_of(::Socket).not_to receive(:flush)
       expect(client.flush).to be client
     end
-  end
-
-  xdescribe '.open' do
-  end
-
-  xdescribe '.with_deadline' do
   end
 
   context 'when not using SSL' do
@@ -474,7 +468,7 @@ RSpec.describe TCPClient do
                 .once
                 .with(instance_of(Integer), exception: false)
                 .and_return(nil)
-             expect(client.readline(timeout: 10)).to eq "Hello "
+              expect(client.readline(timeout: 10)).to eq 'Hello '
             end
 
             it 'is closed' do
