@@ -25,13 +25,13 @@ class TCPClient
     #     cfg.ssl_params = { min_version: :TLS1_2, max_version: :TLS1_3 }
     #   end
     #
-    # @param options [Hash] see {Configuration#initialize} for details
+    # @param options [Hash] see {Configuration#configure} for details
     #
     # @yieldparam cfg {Configuration} the new configuration
     #
     # @return [Configuration] the new default configuration
     #
-    def configure(options = {}, &block)
+    def configure(options = nil, &block)
       @default_configuration = Configuration.create(options, &block)
     end
   end

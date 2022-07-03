@@ -60,20 +60,34 @@ RSpec.describe TCPClient::Configuration do
       end
     end
 
-    context 'with valid options' do
-      subject(:configuration) do
-        TCPClient::Configuration.new(
-          buffered: false,
-          keep_alive: false,
-          reverse_lookup: false,
-          normalize_network_errors: true,
-          ssl: true,
-          timeout: 60,
-          timeout_error: custom_error
-        )
-      end
-      let(:custom_error) { Class.new(StandardError) }
+    context 'when options are given' do
+      let(:options) { double(:options) }
 
+      it 'calls #configure with given options' do
+        expect_any_instance_of(TCPClient::Configuration).to receive(
+          :configure
+        ).once.with(options)
+
+        TCPClient::Configuration.new(options)
+      end
+    end
+  end
+
+  describe '#configure' do
+    subject(:configuration) do
+      TCPClient::Configuration.new.configure(
+        buffered: false,
+        keep_alive: false,
+        reverse_lookup: false,
+        normalize_network_errors: true,
+        ssl: true,
+        timeout: 60,
+        timeout_error: custom_error
+      )
+    end
+    let(:custom_error) { Class.new(StandardError) }
+
+    context 'with valid options' do
       it 'allows to configure buffering' do
         expect(configuration.buffered).to be false
       end
@@ -107,52 +121,56 @@ RSpec.describe TCPClient::Configuration do
       end
 
       it 'allows to configure dedicated timeout values' do
-        config =
-          TCPClient::Configuration.new(
-            connect_timeout: 21,
-            read_timeout: 42,
-            write_timeout: 84
-          )
-        expect(config.connect_timeout).to be 21
-        expect(config.read_timeout).to be 42
-        expect(config.write_timeout).to be 84
+        configuration.configure(
+          connect_timeout: 21,
+          read_timeout: 42,
+          write_timeout: 84
+        )
+        expect(configuration.connect_timeout).to be 21
+        expect(configuration.read_timeout).to be 42
+        expect(configuration.write_timeout).to be 84
       end
 
       it 'allows to configure dedicated timeout errors' do
         custom_connect = Class.new(StandardError)
         custom_read = Class.new(StandardError)
         custom_write = Class.new(StandardError)
-        config =
-          TCPClient::Configuration.new(
-            connect_timeout_error: custom_connect,
-            read_timeout_error: custom_read,
-            write_timeout_error: custom_write
-          )
-        expect(config.connect_timeout_error).to be custom_connect
-        expect(config.read_timeout_error).to be custom_read
-        expect(config.write_timeout_error).to be custom_write
-      end
-
-      it 'raises when no exception class is used to configure a timeout error' do
-        expect do
-          TCPClient::Configuration.new(
-            connect_timeout_error: double(:something)
-          )
-        end.to raise_error(TCPClient::NotAnExceptionError)
-        expect do
-          TCPClient::Configuration.new(read_timeout_error: double(:something))
-        end.to raise_error(TCPClient::NotAnExceptionError)
-        expect do
-          TCPClient::Configuration.new(write_timeout_error: double(:something))
-        end.to raise_error(TCPClient::NotAnExceptionError)
+        configuration.configure(
+          connect_timeout_error: custom_connect,
+          read_timeout_error: custom_read,
+          write_timeout_error: custom_write
+        )
+        expect(configuration.connect_timeout_error).to be custom_connect
+        expect(configuration.read_timeout_error).to be custom_read
+        expect(configuration.write_timeout_error).to be custom_write
       end
     end
 
-    context 'with invalid attribute' do
+    context 'when an invalid attribute is given' do
       it 'raises an error' do
-        expect { TCPClient::Configuration.new(invalid: :value) }.to raise_error(
+        expect { configuration.configure(invalid: :value) }.to raise_error(
           TCPClient::UnknownAttributeError
         )
+      end
+    end
+
+    context 'when no exception class is used to configure a timeout error' do
+      it 'raises with invalid connect_timeout_error' do
+        expect do
+          configuration.configure(connect_timeout_error: double(:something))
+        end.to raise_error(TCPClient::NotAnExceptionError)
+      end
+
+      it 'raises with invalid read_timeout_error' do
+        expect do
+          configuration.configure(read_timeout_error: double(:something))
+        end.to raise_error(TCPClient::NotAnExceptionError)
+      end
+
+      it 'raises with invalid write_timeout_error' do
+        expect do
+          configuration.configure(write_timeout_error: double(:something))
+        end.to raise_error(TCPClient::NotAnExceptionError)
       end
     end
   end

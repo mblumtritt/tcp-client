@@ -9,8 +9,9 @@ RSpec.describe 'TCPClient.configure' do
 
   context 'called with parameters' do
     it 'creates a new configuratiion' do
-      expect(TCPClient::Configuration).to receive(:create).once.with(a: 1, b: 2)
-      TCPClient.configure(a: 1, b: 2)
+      options = double(:options)
+      expect(TCPClient::Configuration).to receive(:create).once.with(options)
+      TCPClient.configure(options)
     end
 
     it 'returns the new configuratiion' do

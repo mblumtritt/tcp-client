@@ -30,40 +30,25 @@ class TCPClient
     #
     # @return [Configuration] the initialized configuration
     #
-    def self.create(options = {})
+    def self.create(options = nil)
       configuration = new(options)
       yield(configuration) if block_given?
       configuration
     end
 
     #
-    # Initializes the instance with given options.
+    # Initializes and optionally configures the instance with given options.
     #
-    # @param options [{Symbol => Object}]
-    # @option options [Boolean] :buffered, see {#buffered}
-    # @option options [Boolean] :keep_alive, see {#keep_alive}
-    # @option options [Boolean] :reverse_lookup, see {#reverse_lookup}
-    # @option options [{Symbol => Object}] :ssl_params, see {#ssl_params}
-    # @option options [Numeric] :connect_timeout, see {#connect_timeout}
-    # @option options [Class<Exception>] :connect_timeout_error, see
-    #   {#connect_timeout_error}
-    # @option options [Numeric] :read_timeout, see {#read_timeout}
-    # @option options [Class<Exception>] :read_timeout_error, see
-    #   {#read_timeout_error}
-    # @option options [Numeric] :write_timeout, see {#write_timeout}
-    # @option options [Class<Exception>] :write_timeout_error, see
-    #   {#write_timeout_error}
-    # @option options [Boolean] :normalize_network_errors, see
-    #   {#normalize_network_errors}
+    # @see #configure
     #
-    def initialize(options = {})
+    def initialize(options = nil)
       @buffered = @keep_alive = @reverse_lookup = true
       self.timeout = @ssl_params = nil
       @connect_timeout_error = ConnectTimeoutError
       @read_timeout_error = ReadTimeoutError
       @write_timeout_error = WriteTimeoutError
       @normalize_network_errors = false
-      options.each_pair { |attribute, value| set(attribute, value) }
+      configure(options) if options
     end
 
     # @!group Instance Attributes Socket Level
@@ -257,6 +242,8 @@ class TCPClient
 
     # @!endgroup
 
+    # @!group Other Instance Attributes
+
     #
     # Enables/disables if network exceptions should be raised as {NetworkError}.
     #
@@ -274,10 +261,12 @@ class TCPClient
       @normalize_network_errors = value ? true : false
     end
 
+    # @!endgroup
+
     #
     # @return [{Symbol => Object}] Hash containing all attributes
     #
-    # @see #initialize
+    # @see #configure
     #
     def to_h
       {
@@ -293,6 +282,33 @@ class TCPClient
         write_timeout_error: @write_timeout_error,
         normalize_network_errors: @normalize_network_errors
       }
+    end
+
+    #
+    # Configures the instance with given options Hash.
+    #
+    # @param options [{Symbol => Object}]
+    # @option options [Boolean] :buffered, see {#buffered}
+    # @option options [Boolean] :keep_alive, see {#keep_alive}
+    # @option options [Boolean] :reverse_lookup, see {#reverse_lookup}
+    # @option options [{Symbol => Object}] :ssl_params, see {#ssl_params}
+    # @option options [Numeric] :connect_timeout, see {#connect_timeout}
+    # @option options [Class<Exception>] :connect_timeout_error, see
+    #   {#connect_timeout_error}
+    # @option options [Numeric] :read_timeout, see {#read_timeout}
+    # @option options [Class<Exception>] :read_timeout_error, see
+    #   {#read_timeout_error}
+    # @option options [Numeric] :write_timeout, see {#write_timeout}
+    # @option options [Class<Exception>] :write_timeout_error, see
+    #   {#write_timeout_error}
+    # @option options [Boolean] :normalize_network_errors, see
+    #   {#normalize_network_errors}
+    #
+    # @return [Configuration] self
+    #
+    def configure(options)
+      options.each_pair { |attribute, value| set(attribute, value) }
+      self
     end
 
     # @!visibility private
