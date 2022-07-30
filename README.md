@@ -1,6 +1,6 @@
 # TCPClient
 
-A TCP client implementation with working timeout support.
+Use your TCP connections with working timeout.
 
 - Gem: [rubygems.org](https://rubygems.org/gems/tcp-client)
 - Source: [github.com](https://github.com/mblumtritt/tcp-client)
@@ -8,7 +8,8 @@ A TCP client implementation with working timeout support.
 
 ## Description
 
-This Gem implements a TCP client with (optional) SSL support. It is an easy to use, versatile configurable client that can correctly handle time limits. Unlike other implementations, this client respects predefined/configurable time limits for each method (`connect`, `read`, `write`). Deadlines for a sequence of read/write actions can also be monitored.
+This gem implements a customizable TCP client class that gives you control over time limits. You can set time limits for individual read or write calls or set a deadline for entire call sequences.
+It has a very small footprint, no dependencies and is easily useable.
 
 ## Sample
 
@@ -37,7 +38,7 @@ response =
 puts(response)
 ```
 
-For more samples see [the samples dir](https://github.com/mblumtritt/tcp-client/tree/main/sample)
+For more samples see [the examples dir](https://github.com/mblumtritt/tcp-client/tree/main/examples)
 
 ## Installation
 
@@ -61,7 +62,7 @@ To install the gem globally use:
 gem install tcp-client
 ```
 
-After that you need only a single line of code in your project to have on board:
+After that you need only a single line of code in your project to have it on board:
 
 ```ruby
 require 'tcp-client'
