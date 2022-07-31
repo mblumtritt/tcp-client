@@ -38,13 +38,13 @@ response =
 puts(response)
 ```
 
-For more samples see [the examples dir](https://github.com/mblumtritt/tcp-client/tree/main/examples)
+For more samples see [the examples dir](./examples)
 
 ## Installation
 
-Use [Bundler](http://gembundler.com/) to use TCPClient in your own project:
+Use [Bundler](http://gembundler.com/) to add TCPClient in your own project:
 
-Add to your `Gemfile`:
+Include in your `Gemfile`:
 
 ```ruby
 gem 'tcp-client'
