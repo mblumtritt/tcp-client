@@ -153,7 +153,7 @@ class TCPClient
   #
   # @return [TCPClient] itself
   #
-  # @raise {NoOpenSSLError} if SSL should be used but OpenSSL is not avail
+  # @raise [NoOpenSSLError] if SSL should be used but OpenSSL is not avail
   #
   # @see NetworkError
   #
