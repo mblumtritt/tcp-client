@@ -1,10 +1,10 @@
-# TCPClient
+# TCPClient ![version](https://img.shields.io/gem/v/tcp-client?label=)
 
 Use your TCP connections with working timeout.
 
 - Gem: [rubygems.org](https://rubygems.org/gems/tcp-client)
 - Source: [github.com](https://github.com/mblumtritt/tcp-client)
-- Help: [rubydoc.info](https://rubydoc.info/gems/tcp-client)
+- Help: [rubydoc.info](https://rubydoc.info/gems/tcp-client/TCPClient)
 
 ## Description
 
