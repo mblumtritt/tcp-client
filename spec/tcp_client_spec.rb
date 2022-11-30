@@ -41,11 +41,11 @@ RSpec.describe TCPClient do
       expect(client.configuration).to be_nil
     end
 
-    it 'failes when read is called' do
+    it 'fails when read is called' do
       expect { client.read(42) }.to raise_error(TCPClient::NotConnectedError)
     end
 
-    it 'failes when write is called' do
+    it 'fails when write is called' do
       expect { client.write('?!') }.to raise_error(TCPClient::NotConnectedError)
     end
 
