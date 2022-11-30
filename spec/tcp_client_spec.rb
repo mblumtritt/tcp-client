@@ -41,11 +41,11 @@ RSpec.describe TCPClient do
       expect(client.configuration).to be_nil
     end
 
-    it 'failes when read is called' do
+    it 'fails when read is called' do
       expect { client.read(42) }.to raise_error(TCPClient::NotConnectedError)
     end
 
-    it 'failes when write is called' do
+    it 'fails when write is called' do
       expect { client.write('?!') }.to raise_error(TCPClient::NotConnectedError)
     end
 
@@ -81,16 +81,16 @@ RSpec.describe TCPClient do
 
     it 'allows to read data' do
       result = '-' * 42
-      allow_any_instance_of(::Socket).to receive(:read)
-        .with(42)
-        .and_return(result)
+      allow_any_instance_of(::Socket).to receive(:read).with(42).and_return(
+        result
+      )
       expect(client.read(42)).to be result
     end
 
     it 'allows to write data' do
-      allow_any_instance_of(::Socket).to receive(:write)
-        .with('!' * 21)
-        .and_return(21)
+      allow_any_instance_of(::Socket).to receive(:write).with(
+        '!' * 21
+      ).and_return(21)
       expect(client.write('!' * 21)).to be 21
     end
 
@@ -155,24 +155,28 @@ RSpec.describe TCPClient do
 
       it 'configures the socket' do
         expect_any_instance_of(::Socket).to receive(:sync=).once.with(true)
-        expect_any_instance_of(::Socket).to receive(:setsockopt)
-          .once
-          .with(:TCP, :NODELAY, 1)
-        expect_any_instance_of(::Socket).to receive(:setsockopt)
-          .once
-          .with(:SOCKET, :KEEPALIVE, 1)
-        expect_any_instance_of(::Socket).to receive(:do_not_reverse_lookup=)
-          .once
-          .with(false)
+        expect_any_instance_of(::Socket).to receive(:setsockopt).once.with(
+          :TCP,
+          :NODELAY,
+          1
+        )
+        expect_any_instance_of(::Socket).to receive(:setsockopt).once.with(
+          :SOCKET,
+          :KEEPALIVE,
+          1
+        )
+        expect_any_instance_of(::Socket).to receive(
+          :do_not_reverse_lookup=
+        ).once.with(false)
         expect_any_instance_of(::Socket).to receive(:connect)
         client.connect('localhost:1234', configuration)
       end
 
       context 'when a timeout is specified' do
         it 'checks the time' do
-          expect_any_instance_of(::Socket).to receive(:connect_nonblock)
-            .once
-            .with(kind_of(String), exception: false)
+          expect_any_instance_of(::Socket).to receive(
+            :connect_nonblock
+          ).once.with(kind_of(String), exception: false)
           client.connect('localhost:1234', configuration, timeout: 10)
         end
 
@@ -197,8 +201,9 @@ RSpec.describe TCPClient do
 
         context 'when the connection can not be established in time' do
           before do
-            allow_any_instance_of(::Socket).to receive(:connect_nonblock)
-              .and_return(:wait_writable)
+            allow_any_instance_of(::Socket).to receive(
+              :connect_nonblock
+            ).and_return(:wait_writable)
           end
 
           it 'raises an exception' do
@@ -284,21 +289,24 @@ RSpec.describe TCPClient do
 
       context 'when a timeout is specified' do
         it 'checks the time' do
-          expect_any_instance_of(::Socket).to receive(:read_nonblock)
-            .and_return(data)
+          expect_any_instance_of(::Socket).to receive(
+            :read_nonblock
+          ).and_return(data)
           expect(client.read(timeout: 10)).to be data
         end
 
         context 'when socket closed before any data can be read' do
           it 'returns empty buffer' do
-            expect_any_instance_of(::Socket).to receive(:read_nonblock)
-              .and_return(nil)
+            expect_any_instance_of(::Socket).to receive(
+              :read_nonblock
+            ).and_return(nil)
             expect(client.read(timeout: 10)).to be_empty
           end
 
           it 'is closed' do
-            expect_any_instance_of(::Socket).to receive(:read_nonblock)
-              .and_return(nil)
+            expect_any_instance_of(::Socket).to receive(
+              :read_nonblock
+            ).and_return(nil)
 
             client.read(timeout: 10)
             expect(client).to be_closed
@@ -348,8 +356,9 @@ RSpec.describe TCPClient do
 
         context 'when the data can not be read in time' do
           before do
-            allow_any_instance_of(::Socket).to receive(:read_nonblock)
-              .and_return(:wait_readable)
+            allow_any_instance_of(::Socket).to receive(
+              :read_nonblock
+            ).and_return(:wait_readable)
           end
           it 'raises an exception' do
             expect { client.read(timeout: 0.25) }.to raise_error(
@@ -424,20 +433,23 @@ RSpec.describe TCPClient do
 
       context 'when a timeout is specified' do
         it 'checks the time' do
-          expect_any_instance_of(::Socket).to receive(:read_nonblock)
-            .and_return("Hello World\nHello World\n")
+          expect_any_instance_of(::Socket).to receive(
+            :read_nonblock
+          ).and_return("Hello World\nHello World\n")
           expect(client.readline(timeout: 10)).to eq "Hello World\n"
         end
 
         it 'optional chomps the line' do
-          expect_any_instance_of(::Socket).to receive(:read_nonblock)
-            .and_return("Hello World\nHello World\n")
+          expect_any_instance_of(::Socket).to receive(
+            :read_nonblock
+          ).and_return("Hello World\nHello World\n")
           expect(client.readline(chomp: true, timeout: 10)).to eq 'Hello World'
         end
 
         it 'uses the given separator' do
-          expect_any_instance_of(::Socket).to receive(:read_nonblock)
-            .and_return("Hello/World\n")
+          expect_any_instance_of(::Socket).to receive(
+            :read_nonblock
+          ).and_return("Hello/World\n")
           expect(client.readline('/', timeout: 10)).to eq 'Hello/'
         end
 
@@ -488,8 +500,9 @@ RSpec.describe TCPClient do
 
         context 'when the data can not be read in time' do
           before do
-            allow_any_instance_of(::Socket).to receive(:read_nonblock)
-              .and_return(:wait_readable)
+            allow_any_instance_of(::Socket).to receive(
+              :read_nonblock
+            ).and_return(:wait_readable)
           end
           it 'raises an exception' do
             expect { client.readline(timeout: 0.25) }.to raise_error(
@@ -557,8 +570,9 @@ RSpec.describe TCPClient do
 
       context 'when a timeout is specified' do
         it 'checks the time' do
-          expect_any_instance_of(::Socket).to receive(:write_nonblock)
-            .and_return(data_size)
+          expect_any_instance_of(::Socket).to receive(
+            :write_nonblock
+          ).and_return(data_size)
           expect(client.write(data, timeout: 10)).to be data_size
         end
 
@@ -596,8 +610,9 @@ RSpec.describe TCPClient do
 
         context 'when the data can not be written in time' do
           before do
-            allow_any_instance_of(::Socket).to receive(:write_nonblock)
-              .and_return(:wait_writable)
+            allow_any_instance_of(::Socket).to receive(
+              :write_nonblock
+            ).and_return(:wait_writable)
           end
           it 'raises an exception' do
             expect { client.write(data, timeout: 0.25) }.to raise_error(
@@ -652,17 +667,15 @@ RSpec.describe TCPClient do
         allow_any_instance_of(::Socket).to receive(:read_nonblock) do |_, size|
           'r' * size
         end
-        allow_any_instance_of(::Socket).to receive(
-          :write_nonblock
-        ) do |_, data|
+        allow_any_instance_of(::Socket).to receive(:write_nonblock) do |_, data|
           data.bytesize
         end
       end
 
       it 'allows to use a timeout value for all actions in the given block' do
-        expect_any_instance_of(::Socket).to receive(:connect_nonblock)
-          .once
-          .with(kind_of(String), exception: false)
+        expect_any_instance_of(::Socket).to receive(
+          :connect_nonblock
+        ).once.with(kind_of(String), exception: false)
         expect_any_instance_of(::Socket).to receive(:read_nonblock)
           .once
           .with(instance_of(Integer), exception: false)
@@ -706,11 +719,15 @@ RSpec.describe TCPClient do
       end
 
       context 'when #connect fails' do
+        before do
+          allow_any_instance_of(::Socket).to receive(
+            :connect_nonblock
+          ).and_return(:wait_writable)
+        end
+
         it 'raises an exception' do
-          expect_any_instance_of(::Socket).to receive(:connect_nonblock)
-            .and_return(:wait_writable)
           expect do
-            client.with_deadline(0.25) do
+            client.with_deadline(0.5) do
               client.connect('localhost:1234', configuration)
               client.read(12)
               client.write('Hello World!')
@@ -720,11 +737,15 @@ RSpec.describe TCPClient do
       end
 
       context 'when #read fails' do
+        before do
+          allow_any_instance_of(::Socket).to receive(:read_nonblock).and_return(
+            :wait_readable
+          )
+        end
+
         it 'raises an exception' do
-          expect_any_instance_of(::Socket).to receive(:read_nonblock)
-            .and_return(:wait_readable)
           expect do
-            client.with_deadline(0.25) do
+            client.with_deadline(0.5) do
               client.connect('localhost:1234', configuration)
               client.write('Hello World!')
               client.read(12)
@@ -734,11 +755,15 @@ RSpec.describe TCPClient do
       end
 
       context 'when #write fails' do
+        before do
+          allow_any_instance_of(::Socket).to receive(
+            :write_nonblock
+          ).and_return(:wait_writable)
+        end
+
         it 'raises an exception' do
-          expect_any_instance_of(::Socket).to receive(:write_nonblock)
-            .and_return(:wait_writable)
           expect do
-            client.with_deadline(0.25) do
+            client.with_deadline(0.5) do
               client.connect('localhost:1234', configuration)
               client.read(12)
               client.write('Hello World!')
@@ -776,16 +801,11 @@ RSpec.describe TCPClient do
         #   .with(max_version: :TLS1_3, min_version: :TLS1_2)
         #   .and_call_original
         expect_any_instance_of(::OpenSSL::SSL::SSLSocket).to receive(
-            :sync_close=
-          )
-          .once
-          .with(true)
-          .and_call_original
+          :sync_close=
+        ).once.with(true).and_call_original
         expect_any_instance_of(::OpenSSL::SSL::SSLSocket).to receive(
-            :post_connection_check
-          )
-          .once
-          .with('localhost')
+          :post_connection_check
+        ).once.with('localhost')
 
         TCPClient.new.connect('localhost:1234', configuration)
       end

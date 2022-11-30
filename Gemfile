@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 group :development, :test do
   gem 'bundler'
   gem 'rake'
+  gem 'prettier'
 end
 
 group :development do
