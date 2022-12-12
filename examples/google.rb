@@ -2,7 +2,7 @@
 
 require_relative '../lib/tcp-client'
 
-# global configuration.
+# global configuration:
 # - 0.5 seconds to connect the server
 # - 0.25 seconds to write a single data junk
 # - 0.25 seconds to read some bytes
