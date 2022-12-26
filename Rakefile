@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
+$stdout.sync = $stderr.sync = true
+
 require 'rake/clean'
 require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
 require 'yard'
 
-$stdout.sync = $stderr.sync = true
-
 CLEAN << '.yardoc'
-CLOBBER << 'prj' << 'doc'
+CLOBBER << 'doc'
 
 task(:default) { exec('rake --tasks') }
 
