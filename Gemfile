@@ -3,17 +3,17 @@
 source 'https://rubygems.org'
 
 group :development, :test do
-  gem 'bundler'
-  gem 'rake'
-  gem 'prettier'
+  gem 'bundler', require: false
+  gem 'rake', require: false
+  gem 'prettier', require: false
 end
 
 group :development do
-  gem 'yard'
+  gem 'yard', require: false
 end
 
 group :test do
-  gem 'rspec'
+  gem 'rspec', require: false
 end
 
 gemspec
