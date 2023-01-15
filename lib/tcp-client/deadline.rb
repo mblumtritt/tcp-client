@@ -12,7 +12,7 @@ class TCPClient
     end
 
     def remaining_time
-      @deadline&.-(now)
+      @deadline && (remaining = @deadline - now) > 0 ? remaining : nil
     end
 
     private
