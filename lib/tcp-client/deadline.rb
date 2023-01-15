@@ -4,15 +4,15 @@ class TCPClient
   class Deadline
     def initialize(timeout)
       timeout = timeout&.to_f
-      @deadline = timeout&.positive? ? now + timeout : 0
+      @deadline = timeout&.positive? ? now + timeout : nil
     end
 
     def valid?
-      @deadline != 0
+      !@deadline.nil?
     end
 
     def remaining_time
-      (@deadline != 0) && (remaining = @deadline - now) > 0 ? remaining : nil
+      @deadline&.-(now)
     end
 
     private

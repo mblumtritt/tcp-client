@@ -111,8 +111,11 @@ class TCPClient
 
     def init_from_string(str)
       @hostname, port = from_string(str.to_s)
-      return init_from_addrinfo(Addrinfo.tcp(nil, port)) unless @hostname
-      @addrinfo = Addrinfo.tcp(@hostname, port)
+      if @hostname
+        @addrinfo = Addrinfo.tcp(@hostname, port)
+      else
+        init_from_addrinfo(Addrinfo.tcp(nil, port)) unless @hostname
+      end
     end
 
     def from_string(str)

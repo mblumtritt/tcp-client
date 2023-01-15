@@ -2,10 +2,18 @@
 
 class TCPClient
   module IOWithDeadlineMixin
-    def self.included(mod)
-      methods = mod.instance_methods
-      return if methods.index(:wait_writable) && methods.index(:wait_readable)
-      mod.include(methods.index(:to_io) ? WaitWithIO : WaitWithSelect)
+    class << self
+      private
+
+      def included(mod)
+        return if supports_wait?(mod)
+        mod.include(method_defined?(:to_io) ? WaitWithIO : WaitWithSelect)
+      end
+
+      def supports_wait?(mod)
+        mod.method_defined?(:wait_writable) &&
+          mod.method_defined?(:wait_readable)
+      end
     end
 
     def read_with_deadline(nbytes, deadline, exception)
@@ -37,8 +45,8 @@ class TCPClient
     end
 
     def write_with_deadline(data, deadline, exception)
-      raise(exception) unless deadline.remaining_time
       return 0 if (size = data.bytesize).zero?
+      raise(exception) unless deadline.remaining_time
       result = 0
       loop do
         written =
@@ -62,6 +70,7 @@ class TCPClient
     end
 
     def fetch_slice(size)
+      return ''.b if size.zero?
       result = @read_buffer.byteslice(0, size)
       rest = @read_buffer.bytesize - result.bytesize
       @read_buffer = rest.zero? ? nil : @read_buffer.byteslice(size, rest)
@@ -79,10 +88,10 @@ class TCPClient
         case ret = yield
         when :wait_writable
           remaining_time = deadline.remaining_time or raise(exception)
-          raise(exception) if wait_writable(remaining_time).nil?
+          wait_writable(remaining_time) or raise(exception)
         when :wait_readable
           remaining_time = deadline.remaining_time or raise(exception)
-          raise(exception) if wait_readable(remaining_time).nil?
+          wait_readable(remaining_time) or raise(exception)
         else
           return ret
         end

@@ -225,9 +225,8 @@ class TCPClient
   def readline(separator = $/, chomp: false, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?
     deadline = create_deadline(timeout, configuration.read_timeout)
-    unless deadline.valid?
+    deadline.valid? or
       return stem_errors { @socket.readline(separator, chomp: chomp) }
-    end
     exception ||= configuration.read_timeout_error
     line =
       stem_errors(exception) do
@@ -328,7 +327,7 @@ class TCPClient
     yield
   rescue *NETWORK_ERRORS => e
     raise unless configuration.normalize_network_errors
-    (except && e.is_a?(except)) ? raise : raise(NetworkError, e)
+    except && e.is_a?(except) ? raise : raise(NetworkError, e)
   end
 
   NETWORK_ERRORS =
