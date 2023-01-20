@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.metadata['source_code_uri'] = spec.homepage
   spec.metadata['bug_tracker_uri'] = "#{spec.homepage}/issues"
   spec.metadata['documentation_uri'] = 'https://rubydoc.info/gems/tcp-client'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.required_ruby_version = '>= 3.0.0'
 
