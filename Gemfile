@@ -5,10 +5,10 @@ source 'https://rubygems.org'
 group :development, :test do
   gem 'bundler', require: false
   gem 'rake', require: false
-  gem 'prettier', require: false
 end
 
 group :development do
+  gem 'prettier', require: false
   gem 'yard', require: false
 end
 
