@@ -48,7 +48,7 @@ class TCPClient
       return 0 if (size = data.bytesize).zero?
       raise(exception) unless deadline.remaining_time
       result = 0
-      loop do
+      while true
         written =
           with_deadline(deadline, exception) do
             write_nonblock(data, exception: false)
@@ -84,7 +84,7 @@ class TCPClient
     end
 
     def with_deadline(deadline, exception)
-      loop do
+      while true
         case ret = yield
         when :wait_writable
           remaining_time = deadline.remaining_time or raise(exception)
