@@ -268,7 +268,7 @@ class TCPClient
     #
     # @see #configure
     #
-    def to_h
+    def to_hash
       {
         buffered: @buffered,
         keep_alive: @keep_alive,
@@ -282,6 +282,17 @@ class TCPClient
         write_timeout_error: @write_timeout_error,
         normalize_network_errors: @normalize_network_errors
       }
+    end
+
+    #
+    # @overload to_h
+    # @overload to_h(&block)
+    # @return [{Symbol => Object}] Hash containing all attributes
+    #
+    # @see #configure
+    #
+    def to_h(&block)
+      block ? to_hash.to_h(&block) : to_hash
     end
 
     #
@@ -326,7 +337,7 @@ class TCPClient
 
     # @!visibility private
     def ==(other)
-      to_h == other.to_h
+      to_hash == other.to_h
     end
     alias eql? ==
 
