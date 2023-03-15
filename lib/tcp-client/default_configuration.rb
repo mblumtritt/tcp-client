@@ -31,8 +31,8 @@ class TCPClient
     #
     # @return [Configuration] the new default configuration
     #
-    def configure(options = nil, &block)
-      @default_configuration = Configuration.create(options, &block)
+    def configure(options = nil, &)
+      @default_configuration = Configuration.create(options, &)
     end
   end
 
