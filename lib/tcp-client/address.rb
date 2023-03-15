@@ -4,21 +4,46 @@ require 'socket'
 
 class TCPClient
   #
-  # The address used by a TCPClient
+  # The address used by a TCPClient.
+  #
+  # @note An {Address} does not resolve the required TCP information until it is
+  #   needed.
+  #
+  #   This means that address resolution only occurs when an instance attribute
+  #   is accessed or the address is frozen.
+  #   To force the address resolution at a certain time, {#freeze} can be called.
   #
   class Address
     #
-    # @return [String] the host name
-    #
-    attr_reader :hostname
-
-    #
+    # @attribute [r] addrinfo
     # @return [Addrinfo] the address info
     #
-    attr_reader :addrinfo
+    def addrinfo
+      freeze if @addrinfo.nil?
+      @addrinfo
+    end
+
+    #
+    # @attribute [r] host
+    # @return [String] the host name
+    #
+    def host
+      freeze if @host.nil?
+      @host
+    end
+    alias hostname host
+
+    #
+    # @attribute [r] port
+    # @return [Integer] the port number
+    #
+    def port
+      addrinfo.ip_port
+    end
 
     #
     # Initializes an address
+    #
     # @overload initialize(addr)
     #   The addr can be specified as
     #
@@ -49,32 +74,7 @@ class TCPClient
     #   @param port [Integer] the addressed port
     #
     def initialize(addr)
-      case addr
-      when self.class
-        init_from_selfclass(addr)
-      when Addrinfo
-        init_from_addrinfo(addr)
-      when Integer
-        init_from_addrinfo(Addrinfo.tcp(nil, addr))
-      else
-        init_from_string(addr)
-      end
-      @addrinfo.freeze
-    end
-
-    #
-    # @attribute [r] port
-    # @return [Integer] the port number
-    #
-    def port
-      @addrinfo.ip_port
-    end
-
-    #
-    # @return [String] text representation of self as "host:port"
-    #
-    def to_s
-      hostname.index(':') ? "[#{hostname}]:#{port}" : "#{hostname}:#{port}"
+      @addr = addr
     end
 
     #
@@ -82,8 +82,40 @@ class TCPClient
     #
     # @return [Hash] host and port
     #
-    def to_h
-      { host: hostname, port: port }
+    def to_hash
+      { host: host, port: port }
+    end
+
+    #
+    # Convert `self` to a Hash containing host and port attribute.
+    #
+    # @overload to_h
+    # @overload to_h(&block)
+    # @return [Hash] host and port
+    #
+    def to_h(&block)
+      block ? [[:host, host], [:port, port]].to_h(&block) : to_hash
+    end
+
+    #
+    # @return [String] text representation of self as "host:port"
+    #
+    def to_s
+      host.index(':') ? "[#{host}]:#{port}" : "#{host}:#{port}"
+    end
+
+    #
+    # Force the address resolution and prevents further modifications of itself.
+    #
+    # @return [Address] itself
+    #
+    def freeze
+      return super if frozen?
+      solve
+      @addrinfo.freeze
+      @host.freeze
+      @addr = nil
+      super
     end
 
     # @!visibility private
@@ -99,26 +131,40 @@ class TCPClient
 
     private
 
-    def init_from_selfclass(address)
-      @hostname = address.hostname
-      @addrinfo = address.addrinfo
-    end
-
-    def init_from_addrinfo(addrinfo)
-      @hostname = addrinfo.getnameinfo(Socket::NI_NUMERICSERV).first
-      @addrinfo = addrinfo
-    end
-
-    def init_from_string(str)
-      @hostname, port = from_string(str.to_s)
-      if @hostname
-        @addrinfo = Addrinfo.tcp(@hostname, port)
+    def solve
+      case @addr
+      when self.class
+        from_self_class(@addr)
+      when Addrinfo
+        from_addrinfo(@addr)
+      when Integer
+        from_addrinfo(Addrinfo.tcp(nil, @addr))
       else
-        init_from_addrinfo(Addrinfo.tcp(nil, port)) unless @hostname
+        from_string(@addr)
       end
     end
 
+    def from_self_class(address)
+      unless address.frozen?
+        @addr = address.instance_variable_get(:@addr)
+        return solve
+      end
+      @addrinfo = address.addrinfo
+      @host = address.host
+    end
+
+    def from_addrinfo(addrinfo)
+      @host = addrinfo.getnameinfo(Socket::NI_NUMERICSERV).first
+      @addrinfo = addrinfo
+    end
+
     def from_string(str)
+      @host, port = host_n_port(str.to_s)
+      return @addrinfo = Addrinfo.tcp(@host, port) if @host
+      from_addrinfo(Addrinfo.tcp(nil, port))
+    end
+
+    def host_n_port(str)
       idx = str.rindex(':') or return nil, str.to_i
       name = str[0, idx].delete_prefix('[').delete_suffix(']')
       [name.empty? ? nil : name, str[idx + 1, str.size - idx].to_i]
