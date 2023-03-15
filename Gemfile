@@ -8,7 +8,7 @@ group :development, :test do
 end
 
 group :development do
-  gem 'prettier', require: false
+  gem 'prettier_print', require: false
   gem 'yard', require: false
 end
 
