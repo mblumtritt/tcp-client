@@ -204,7 +204,7 @@ RSpec.describe TCPClient do
                 'localhost:1234',
                 configuration,
                 timeout: 0.1,
-                exception:
+                exception: exception
               )
             end.to raise_error(exception)
           end
