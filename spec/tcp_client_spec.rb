@@ -27,16 +27,8 @@ RSpec.describe TCPClient do
 
     it { is_expected.to be_closed }
 
-    it 'has no address' do
-      expect(client.address).to be_nil
-    end
-
-    it 'returns no address string' do
-      expect(client.to_s).to eq ''
-    end
-
-    it 'has no configuration' do
-      expect(client.configuration).to be_nil
+    it do
+      is_expected.to have_attributes(address: nil, to_s: '', configuration: nil)
     end
 
     it 'fails when read is called' do
@@ -65,14 +57,14 @@ RSpec.describe TCPClient do
 
     it 'has an address' do
       expect(client.address).to be_a TCPClient::Address
+      expect(client.address).to be_frozen
     end
 
-    it 'returns an address string' do
-      expect(client.to_s).to eq 'localhost:1234'
-    end
-
-    it 'uses the given configuration' do
-      expect(client.configuration).to be configuration
+    it do
+      is_expected.to have_attributes(
+        to_s: 'localhost:1234',
+        configuration: configuration
+      )
     end
 
     it 'allows to read data' do
@@ -113,14 +105,14 @@ RSpec.describe TCPClient do
 
     it 'has an address' do
       expect(client.address).to be_a TCPClient::Address
+      expect(client.address).to be_frozen
     end
 
-    it 'returns an address string' do
-      expect(client.to_s).to eq 'localhost:0'
-    end
-
-    it 'uses the given configuration' do
-      expect(client.configuration).to be configuration
+    it do
+      is_expected.to have_attributes(
+        to_s: 'localhost:0',
+        configuration: configuration
+      )
     end
 
     it 'fails when read is called' do
@@ -244,9 +236,7 @@ RSpec.describe TCPClient do
 
           SOCKET_ERRORS.each do |error|
             it "raises TCPClient::NetworkError when a #{error} appeared" do
-              allow_any_instance_of(Socket).to receive(:connect) {
-                raise error
-              }
+              allow_any_instance_of(Socket).to receive(:connect) { raise error }
               expect do
                 TCPClient.new.connect('localhost:1234', configuration)
               end.to raise_error(TCPClient::NetworkError)
@@ -282,9 +272,9 @@ RSpec.describe TCPClient do
 
       context 'when a timeout is specified' do
         it 'checks the time' do
-          expect_any_instance_of(Socket).to receive(
-            :read_nonblock
-          ).and_return(data)
+          expect_any_instance_of(Socket).to receive(:read_nonblock).and_return(
+            data
+          )
           expect(client.read(timeout: 10)).to be data
         end
 
@@ -349,9 +339,9 @@ RSpec.describe TCPClient do
 
         context 'when the data can not be read in time' do
           before do
-            allow_any_instance_of(Socket).to receive(
-              :read_nonblock
-            ).and_return(:wait_readable)
+            allow_any_instance_of(Socket).to receive(:read_nonblock).and_return(
+              :wait_readable
+            )
           end
           it 'raises an exception' do
             expect { client.read(timeout: 0.25) }.to raise_error(
@@ -370,9 +360,7 @@ RSpec.describe TCPClient do
 
       context 'when a SocketError appears' do
         it 'does not handle it' do
-          allow_any_instance_of(Socket).to receive(:read) {
-            raise SocketError
-          }
+          allow_any_instance_of(Socket).to receive(:read) { raise SocketError }
           expect { client.read(10) }.to raise_error(SocketError)
         end
 
@@ -426,23 +414,23 @@ RSpec.describe TCPClient do
 
       context 'when a timeout is specified' do
         it 'checks the time' do
-          expect_any_instance_of(Socket).to receive(
-            :read_nonblock
-          ).and_return("Hello World\nHello World\n")
+          expect_any_instance_of(Socket).to receive(:read_nonblock).and_return(
+            "Hello World\nHello World\n"
+          )
           expect(client.readline(timeout: 10)).to eq "Hello World\n"
         end
 
         it 'optional chomps the line' do
-          expect_any_instance_of(Socket).to receive(
-            :read_nonblock
-          ).and_return("Hello World\nHello World\n")
+          expect_any_instance_of(Socket).to receive(:read_nonblock).and_return(
+            "Hello World\nHello World\n"
+          )
           expect(client.readline(chomp: true, timeout: 10)).to eq 'Hello World'
         end
 
         it 'uses the given separator' do
-          expect_any_instance_of(Socket).to receive(
-            :read_nonblock
-          ).and_return("Hello/World\n")
+          expect_any_instance_of(Socket).to receive(:read_nonblock).and_return(
+            "Hello/World\n"
+          )
           expect(client.readline('/', timeout: 10)).to eq 'Hello/'
         end
 
@@ -493,9 +481,9 @@ RSpec.describe TCPClient do
 
         context 'when the data can not be read in time' do
           before do
-            allow_any_instance_of(Socket).to receive(
-              :read_nonblock
-            ).and_return(:wait_readable)
+            allow_any_instance_of(Socket).to receive(:read_nonblock).and_return(
+              :wait_readable
+            )
           end
           it 'raises an exception' do
             expect { client.readline(timeout: 0.25) }.to raise_error(
@@ -514,9 +502,7 @@ RSpec.describe TCPClient do
 
       context 'when a SocketError appears' do
         it 'does not handle it' do
-          allow_any_instance_of(Socket).to receive(:read) {
-            raise SocketError
-          }
+          allow_any_instance_of(Socket).to receive(:read) { raise SocketError }
           expect { client.read(10) }.to raise_error(SocketError)
         end
 
@@ -563,9 +549,9 @@ RSpec.describe TCPClient do
 
       context 'when a timeout is specified' do
         it 'checks the time' do
-          expect_any_instance_of(Socket).to receive(
-            :write_nonblock
-          ).and_return(data_size)
+          expect_any_instance_of(Socket).to receive(:write_nonblock).and_return(
+            data_size
+          )
           expect(client.write(data, timeout: 10)).to be data_size
         end
 
@@ -626,9 +612,7 @@ RSpec.describe TCPClient do
         before { allow_any_instance_of(Socket).to receive(:connect) }
 
         it 'does not handle it' do
-          allow_any_instance_of(Socket).to receive(:write) {
-            raise SocketError
-          }
+          allow_any_instance_of(Socket).to receive(:write) { raise SocketError }
           expect { client.write('some data') }.to raise_error(SocketError)
         end
 
@@ -666,9 +650,10 @@ RSpec.describe TCPClient do
       end
 
       it 'allows to use a timeout value for all actions in the given block' do
-        expect_any_instance_of(Socket).to receive(
-          :connect_nonblock
-        ).once.with(kind_of(String), exception: false)
+        expect_any_instance_of(Socket).to receive(:connect_nonblock).once.with(
+          kind_of(String),
+          exception: false
+        )
         expect_any_instance_of(Socket).to receive(:read_nonblock)
           .once
           .with(instance_of(Integer), exception: false)
@@ -749,9 +734,9 @@ RSpec.describe TCPClient do
 
       context 'when #write fails' do
         before do
-          allow_any_instance_of(Socket).to receive(
-            :write_nonblock
-          ).and_return(:wait_writable)
+          allow_any_instance_of(Socket).to receive(:write_nonblock).and_return(
+            :wait_writable
+          )
         end
 
         it 'raises an exception' do

@@ -161,7 +161,7 @@ class TCPClient
     close if @socket
     @configuration = (configuration || Configuration.default).dup
     raise(NoOpenSSLError) if @configuration.ssl? && !defined?(SSLSocket)
-    @address = stem_errors { Address.new(address) }
+    @address = Address.new(address)
     @socket = create_socket(timeout, exception)
     self
   end

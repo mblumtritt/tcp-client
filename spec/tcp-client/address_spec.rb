@@ -3,83 +3,118 @@
 require_relative '../helper'
 
 RSpec.describe TCPClient::Address do
+  subject(:address) { TCPClient::Address.new(arg) }
+
   describe '.new' do
     context 'when called with an Integer parameter' do
-      subject(:address) { TCPClient::Address.new(42) }
+      let(:arg) { 42 }
 
-      it 'points to the given port on localhost' do
-        expect(address.hostname).to eq 'localhost'
-        expect(address.port).to be 42
-        expect(address.to_s).to eq 'localhost:42'
+      it do
+        is_expected.to have_attributes(
+          host: 'localhost',
+          port: 42,
+          to_s: 'localhost:42'
+        )
       end
 
       it 'uses IPv6' do
-        expect(address.addrinfo.ip?).to be true
         expect(address.addrinfo.ipv6?).to be true
-        expect(address.addrinfo.ipv4?).to be false
       end
     end
 
     context 'when called with an Addrinfo' do
-      subject(:address) { TCPClient::Address.new(addrinfo) }
-      let(:addrinfo) { Addrinfo.tcp('::1', 42) }
+      let(:arg) { Addrinfo.tcp('::1', 42).freeze }
 
-      it 'uses the given Addrinfo' do
-        expect(address.addrinfo).to eq addrinfo
-      end
-
-      it 'points to the given host and port' do
-        expect(address.hostname).to eq 'localhost'
-        expect(address.port).to be 42
-        expect(address.to_s).to eq 'localhost:42'
+      it do
+        is_expected.to have_attributes(
+          addrinfo: arg,
+          host: 'localhost',
+          port: 42,
+          to_s: 'localhost:42'
+        )
       end
 
       it 'uses IPv6' do
-        expect(address.addrinfo.ip?).to be true
         expect(address.addrinfo.ipv6?).to be true
-        expect(address.addrinfo.ipv4?).to be false
       end
     end
 
     context 'when called with a String' do
       context 'when a host name and port is provided' do
-        subject(:address) { TCPClient::Address.new('localhost:42') }
+        let(:arg) { 'localhost:42' }
 
-        it 'points to the given host and port' do
-          expect(address.hostname).to eq 'localhost'
-          expect(address.port).to be 42
-          expect(address.to_s).to eq 'localhost:42'
-          expect(address.addrinfo.ip?).to be true
+        it do
+          is_expected.to have_attributes(
+            host: 'localhost',
+            port: 42,
+            to_s: 'localhost:42'
+          )
         end
 
+        it 'uses IPv6' do
+          expect(address.addrinfo.ipv6?).to be true
+        end
       end
 
       context 'when only a port is provided' do
-        subject(:address) { TCPClient::Address.new(':42') }
+        let(:arg) { ':42' }
 
-        it 'points to the given port on localhost' do
-          expect(address.hostname).to eq 'localhost'
-          expect(address.port).to be 42
-          expect(address.to_s).to eq 'localhost:42'
-          expect(address.addrinfo.ip?).to be true
+        it do
+          is_expected.to have_attributes(
+            host: 'localhost',
+            port: 42,
+            to_s: 'localhost:42'
+          )
+        end
+
+        it 'uses IPv6' do
+          expect(address.addrinfo.ipv6?).to be true
         end
       end
 
       context 'when an IPv6 address is provided' do
-        subject(:address) { TCPClient::Address.new('[::1]:42') }
+        let(:arg) { '[::1]:42' }
 
-        it 'points to the given port on localhost' do
-          expect(address.hostname).to eq '::1'
-          expect(address.port).to be 42
-          expect(address.to_s).to eq '[::1]:42'
-          expect(address.addrinfo.ip?).to be true
+        it do
+          is_expected.to have_attributes(
+            host: '::1',
+            port: 42,
+            to_s: '[::1]:42'
+          )
         end
+
+        it 'uses IPv6' do
+          expect(address.addrinfo.ipv6?).to be true
+        end
+      end
+    end
+
+    context 'when called with an unfrozen TCPClient::Address' do
+      let(:arg) { TCPClient::Address.new(42) }
+
+      it 'resolves the address info' do
+        expect(Addrinfo).to receive(:tcp).with(nil, 42).once.and_call_original
+        is_expected.to have_attributes(host: 'localhost', port: 42)
+      end
+
+      it 'does not change the source adddress' do
+        expect(address.addrinfo.ip?).to be true
+        expect(arg).not_to be_frozen
+      end
+    end
+
+    context 'when called with an frozen TCPClient::Address' do
+      let!(:arg) { TCPClient::Address.new(42).freeze }
+
+      it 'uses the already resolved data' do
+        expect(Addrinfo).not_to receive(:tcp)
+        is_expected.to have_attributes(host: 'localhost', port: 42)
       end
     end
   end
 
   describe '#to_h' do
-    subject(:address) { TCPClient::Address.new('localhost:42') }
+    subject(:arg) { 'localhost:42' }
 
     it 'returns itself as an Hash' do
       expect(address.to_h).to eq(host: 'localhost', port: 42)
