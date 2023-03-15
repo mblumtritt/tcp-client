@@ -226,7 +226,7 @@ class TCPClient
     raise(NotConnectedError) if closed?
     deadline = create_deadline(timeout, configuration.read_timeout)
     deadline.valid? or
-      return stem_errors { @socket.readline(separator, chomp: chomp) }
+      return stem_errors { @socket.readline(separator, chomp:) }
     exception ||= configuration.read_timeout_error
     line =
       stem_errors(exception) do

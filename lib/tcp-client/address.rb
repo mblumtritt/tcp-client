@@ -83,7 +83,7 @@ class TCPClient
     # @return [Hash] host and port
     #
     def to_hash
-      { host: host, port: port }
+      { host:, port: }
     end
 
     #
