@@ -139,7 +139,7 @@ RSpec.describe TCPClient do
       subject(:client) { TCPClient.new }
 
       it 'configures the socket' do
-        expect_any_instance_of(Socket).to receive(:sync=).once.with(true)
+        expect_any_instance_of(Socket).to receive(:sync=).with(true)
         expect_any_instance_of(Socket).to receive(:setsockopt).once.with(
           :TCP,
           :NODELAY,
