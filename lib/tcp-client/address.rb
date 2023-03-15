@@ -94,7 +94,7 @@ class TCPClient
     # @return [Hash] host and port
     #
     def to_h(&block)
-      block ? [[:host, host], [:port, port]].to_h(&block) : to_hash
+      block ? to_hash.to_h(&block) : to_hash
     end
 
     #
@@ -120,7 +120,7 @@ class TCPClient
 
     # @!visibility private
     def ==(other)
-      to_h == other.to_h
+      to_hash == other.to_h
     end
     alias eql? ==
 
