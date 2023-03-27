@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../lib/tcp-client'
+require 'tcp-client'
 
 # global configuration:
 # - 0.5 seconds to connect the server

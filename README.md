@@ -18,11 +18,14 @@ require 'tcp-client'
 
 # create a configuration:
 # - don't use internal buffering
-# - use TLS 1.2 or TLS 1.3
-cfg = TCPClient::Configuration.create(
-  buffered: false,
-  ssl_params: {min_version: :TLS1_2, max_version: :TLS1_3}
-)
+# - use at least TLS 1.2
+cfg =
+  TCPClient::Configuration.create(
+    buffered: false,
+    ssl_params: {
+      min_version: :TLS1_2
+    }
+  )
 
 # request to Google.com:
 # - limit all network interactions to 1.5 seconds
@@ -52,13 +55,13 @@ gem 'tcp-client'
 
 and install it by running Bundler:
 
-```bash
+```shell
 bundle
 ```
 
 To install the gem globally use:
 
-```bash
+```shell
 gem install tcp-client
 ```
 

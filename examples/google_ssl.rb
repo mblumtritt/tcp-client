@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
-require_relative '../lib/tcp-client'
+require 'tcp-client'
 
 # create a configuration:
 # - don't use internal buffering
-# - use TLS 1.2 or TLS 1.3
+# - use at least TLS 1.2
 cfg =
   TCPClient::Configuration.create(
     buffered: false,
     ssl_params: {
-      min_version: :TLS1_2,
-      max_version: :TLS1_3
+      min_version: :TLS1_2
     }
   )
 
