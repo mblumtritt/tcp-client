@@ -45,27 +45,25 @@ For more samples see [the examples dir](./examples)
 
 ## Installation
 
-Use [Bundler](http://gembundler.com/) to add TCPClient in your own project:
-
-Include in your `Gemfile`:
-
-```ruby
-gem 'tcp-client'
-```
-
-and install it by running Bundler:
-
-```shell
-bundle
-```
-
-To install the gem globally use:
+You can install the gem in your system with
 
 ```shell
 gem install tcp-client
 ```
 
-After that you need only a single line of code in your project to have it on board:
+You can use [Bundler](http://gembundler.com/) to add TCPClient to your own project. Add to in your project's `Gemfile`
+
+```ruby
+gem 'tcp-client'
+```
+
+and install it by running Bundler
+
+```shell
+bundle
+```
+
+After that you only need one line of code to have everything together
 
 ```ruby
 require 'tcp-client'
