@@ -21,42 +21,20 @@ RSpec.describe TCPClient::Configuration do
     context 'without any parameter' do
       subject(:configuration) { TCPClient::Configuration.new }
 
-      it 'allows buffering' do
-        expect(configuration.buffered).to be true
-      end
-
-      it 'allows keep alive signals' do
-        expect(configuration.keep_alive).to be true
-      end
-
-      it 'allows reverse address lokup' do
-        expect(configuration.reverse_lookup).to be true
-      end
-
-      it 'does not allow to normalize network errors' do
-        expect(configuration.normalize_network_errors).to be false
-      end
-
-      it 'does not allow SSL connections' do
-        expect(configuration.ssl?).to be false
-      end
-
-      it 'configures no timeout values' do
-        expect(configuration.connect_timeout).to be_nil
-        expect(configuration.read_timeout).to be_nil
-        expect(configuration.write_timeout).to be_nil
-      end
-
-      it 'configures default errors' do
-        expect(
-          configuration.connect_timeout_error
-        ).to be TCPClient::ConnectTimeoutError
-        expect(
-          configuration.read_timeout_error
-        ).to be TCPClient::ReadTimeoutError
-        expect(
-          configuration.write_timeout_error
-        ).to be TCPClient::WriteTimeoutError
+      it do
+        is_expected.to have_attributes(
+          buffered: true,
+          keep_alive: true,
+          reverse_lookup: true,
+          normalize_network_errors: false,
+          ssl?: false,
+          connect_timeout: nil,
+          read_timeout: nil,
+          write_timeout: nil,
+          connect_timeout_error: TCPClient::ConnectTimeoutError,
+          read_timeout_error: TCPClient::ReadTimeoutError,
+          write_timeout_error: TCPClient::WriteTimeoutError
+        )
       end
     end
 
@@ -88,36 +66,20 @@ RSpec.describe TCPClient::Configuration do
     let(:custom_error) { Class.new(StandardError) }
 
     context 'with valid options' do
-      it 'allows to configure buffering' do
-        expect(configuration.buffered).to be false
-      end
-
-      it 'allows to configure keep alive signals' do
-        expect(configuration.keep_alive).to be false
-      end
-
-      it 'allows to configure reverse address lookup' do
-        expect(configuration.reverse_lookup).to be false
-      end
-
-      it 'allows to configure to normalize network errors' do
-        expect(configuration.normalize_network_errors).to be true
-      end
-
-      it 'allows to configures SSL connections' do
-        expect(configuration.ssl?).to be true
-      end
-
-      it 'allows to configure no timeout values' do
-        expect(configuration.connect_timeout).to be 60
-        expect(configuration.read_timeout).to be 60
-        expect(configuration.write_timeout).to be 60
-      end
-
-      it 'allows to configure timeout errors' do
-        expect(configuration.connect_timeout_error).to be custom_error
-        expect(configuration.read_timeout_error).to be custom_error
-        expect(configuration.write_timeout_error).to be custom_error
+      it do
+        is_expected.to have_attributes(
+          buffered: false,
+          keep_alive: false,
+          reverse_lookup: false,
+          normalize_network_errors: true,
+          ssl?: true,
+          connect_timeout: 60,
+          read_timeout: 60,
+          write_timeout: 60,
+          connect_timeout_error: custom_error,
+          read_timeout_error: custom_error,
+          write_timeout_error: custom_error
+        )
       end
 
       it 'allows to configure dedicated timeout values' do
@@ -126,9 +88,11 @@ RSpec.describe TCPClient::Configuration do
           read_timeout: 42,
           write_timeout: 84
         )
-        expect(configuration.connect_timeout).to be 21
-        expect(configuration.read_timeout).to be 42
-        expect(configuration.write_timeout).to be 84
+        is_expected.to have_attributes(
+          connect_timeout: 21,
+          read_timeout: 42,
+          write_timeout: 84
+        )
       end
 
       it 'allows to configure dedicated timeout errors' do
@@ -140,9 +104,11 @@ RSpec.describe TCPClient::Configuration do
           read_timeout_error: custom_read,
           write_timeout_error: custom_write
         )
-        expect(configuration.connect_timeout_error).to be custom_connect
-        expect(configuration.read_timeout_error).to be custom_read
-        expect(configuration.write_timeout_error).to be custom_write
+        is_expected.to have_attributes(
+          connect_timeout_error: custom_connect,
+          read_timeout_error: custom_read,
+          write_timeout_error: custom_write
+        )
       end
     end
 
@@ -230,14 +196,16 @@ RSpec.describe TCPClient::Configuration do
     end
 
     it 'contains same values as the original' do
-      expect(duplicate.buffered).to be false
-      expect(duplicate.connect_timeout).to be 1
-      expect(duplicate.read_timeout).to be 2
-      expect(duplicate.write_timeout).to be 3
-      expect(duplicate.ssl?).to be true
-      expect(duplicate.ssl_params).to eq(
-        min_version: :TLS1_2,
-        max_version: :TLS1_3
+      is_expected.to have_attributes(
+        buffered: false,
+        connect_timeout: 1,
+        read_timeout: 2,
+        write_timeout: 3,
+        ssl?: true,
+        ssl_params: {
+          min_version: :TLS1_2,
+          max_version: :TLS1_3
+        }
       )
     end
   end
@@ -251,16 +219,12 @@ RSpec.describe TCPClient::Configuration do
         expect(config_a).to eq config_b
       end
 
-      context 'using the == operator' do
-        it 'compares to equal' do
-          expect(config_a == config_b).to be true
-        end
+      it 'compares to equal with == operator' do
+        expect(config_a == config_b).to be true
       end
 
-      context 'using the === operator' do
-        it 'compares to equal' do
-          expect(config_a === config_b).to be true
-        end
+      it 'compares to equal with === operator' do
+        expect(config_a === config_b).to be true
       end
     end
 
@@ -272,16 +236,12 @@ RSpec.describe TCPClient::Configuration do
         expect(config_a).not_to eq config_b
       end
 
-      context 'using the == operator' do
-        it 'compares not to equal' do
-          expect(config_a == config_b).to be false
-        end
+      it 'compares not to equal with == operator' do
+        expect(config_a == config_b).to be false
       end
 
-      context 'using the === operator' do
-        it 'compares not to equal' do
-          expect(config_a === config_b).to be false
-        end
+      it 'compares not to equal with === operator' do
+        expect(config_a === config_b).to be false
       end
     end
   end

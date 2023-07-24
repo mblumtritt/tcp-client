@@ -2,20 +2,6 @@
 
 require_relative 'helper'
 
-SOCKET_ERRORS = [
-  Errno::EADDRNOTAVAIL,
-  Errno::ECONNABORTED,
-  Errno::ECONNREFUSED,
-  Errno::ECONNRESET,
-  Errno::EHOSTUNREACH,
-  Errno::EINVAL,
-  Errno::ENETUNREACH,
-  Errno::EPIPE,
-  IOError,
-  SocketError,
-  OpenSSL::SSL::SSLError
-].freeze
-
 RSpec.describe TCPClient do
   subject(:client) { TCPClient.new.connect('localhost:1234', configuration) }
   let(:configuration) do
@@ -75,10 +61,9 @@ RSpec.describe TCPClient do
     end
 
     it 'allows to write data' do
-      allow_any_instance_of(Socket).to receive(:write).with(
-        '!' * 21
-      ).and_return(21)
-      expect(client.write('!' * 21)).to be 21
+      data = '!' * 21
+      allow_any_instance_of(Socket).to receive(:write).with(data).and_return(21)
+      expect(client.write(data)).to be 21
     end
 
     it 'can be closed' do
@@ -213,6 +198,7 @@ RSpec.describe TCPClient do
             begin
               client.connect('localhost:1234', configuration, timeout: 0.1)
             rescue TCPClient::ConnectTimeoutError
+              # ignore
             end
             expect(client).to be_closed
           end
