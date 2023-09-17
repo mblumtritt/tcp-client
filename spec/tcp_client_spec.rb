@@ -162,8 +162,7 @@ RSpec.describe TCPClient do
 
         it 'is not closed' do
           allow_any_instance_of(Socket).to receive(:connect_nonblock).with(
-            kind_of(String),
-            exception: false
+            kind_of(String),             exception: false
           )
           client.connect('localhost:1234', configuration, timeout: 10)
           expect(client).not_to be_closed

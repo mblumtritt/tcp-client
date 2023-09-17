@@ -51,16 +51,10 @@ You can install the gem in your system with
 gem install tcp-client
 ```
 
-You can use [Bundler](http://gembundler.com/) to add TCPClient to your own project. Add to in your project's `Gemfile`
-
-```ruby
-gem 'tcp-client'
-```
-
-and install it by running Bundler
+You can use [Bundler](http://gembundler.com/) to add TCPClient to your own project:
 
 ```shell
-bundle
+bundle add 'tcp-client'
 ```
 
 After that you only need one line of code to have everything together
