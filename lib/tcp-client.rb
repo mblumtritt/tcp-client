@@ -113,7 +113,7 @@ class TCPClient
   attr_reader :configuration
 
   #
-  # @!parse attr_reader :closed?
+  # @attribute [r] :closed?
   # @return [Boolean] whether the connection is closed
   #
   def closed?

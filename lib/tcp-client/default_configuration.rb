@@ -39,7 +39,7 @@ class TCPClient
   class Configuration
     class << self
       #
-      # @!parse attr_reader :default
+      # @attribute [r] :default
       # @return [Configuration] used by default if no dedicated configuration
       #   was specified
       #

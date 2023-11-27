@@ -196,7 +196,7 @@ RSpec.describe TCPClient::Configuration do
     end
 
     it 'contains same values as the original' do
-      is_expected.to have_attributes(
+      expect(subject).to have_attributes(
         buffered: false,
         connect_timeout: 1,
         read_timeout: 2,
