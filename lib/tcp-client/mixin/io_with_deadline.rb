@@ -7,7 +7,7 @@ class TCPClient
 
       def included(mod)
         return if supports_wait?(mod)
-        mod.include(method_defined?(:to_io) ? WaitWithIO : WaitWithSelect)
+        mod.include(mod.method_defined?(:to_io) ? WaitWithIO : WaitWithSelect)
       end
 
       def supports_wait?(mod)
