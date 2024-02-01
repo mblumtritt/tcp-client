@@ -14,12 +14,10 @@ class TCPClient
     def read_with_deadline(nbytes, deadline, exception)
       raise(exception) unless deadline.remaining_time
       return fetch_avail(deadline, exception) if nbytes.nil?
-      return ''.b if nbytes.zero?
       @read_buffer ||= ''.b
       while @read_buffer.bytesize < nbytes
-        read = fetch_next(deadline, exception) and next @read_buffer << read
-        close
-        break
+        read = fetch_next(deadline, exception)
+        read ? @read_buffer << read : (break close)
       end
       fetch_slice(nbytes)
     end
@@ -27,12 +25,10 @@ class TCPClient
     def read_to_with_deadline(sep, deadline, exception)
       raise(exception) unless deadline.remaining_time
       @read_buffer ||= ''.b
-      while @read_buffer.index(sep).nil?
-        read = fetch_next(deadline, exception) and next @read_buffer << read
-        close
-        break
+      while (index = @read_buffer.index(sep)).nil?
+        read = fetch_next(deadline, exception)
+        read ? @read_buffer << read : (break close)
       end
-      index = @read_buffer.index(sep)
       return fetch_slice(index + sep.bytesize) if index
       result = @read_buffer
       @read_buffer = nil
@@ -48,7 +44,7 @@ class TCPClient
           with_deadline(deadline, exception) do
             write_nonblock(data, exception: false)
           end
-        (result += written) >= size and return result
+        return result if (result += written) >= size
         data = data.byteslice(written, data.bytesize - written)
       end
     end
@@ -65,7 +61,7 @@ class TCPClient
     end
 
     def fetch_slice(size)
-      return ''.b if size.zero?
+      return ''.b if size <= 0
       result = @read_buffer.byteslice(0, size)
       rest = @read_buffer.bytesize - result.bytesize
       @read_buffer = rest.zero? ? nil : @read_buffer.byteslice(size, rest)
@@ -96,18 +92,13 @@ class TCPClient
     end
 
     module WaitWithIO
-      def wait_writable(remaining_time) = to_io.wait_writable(remaining_time)
-      def wait_readable(remaining_time) = to_io.wait_readable(remaining_time)
+      def wait_writable(time) = to_io.wait_writable(time)
+      def wait_readable(time) = to_io.wait_readable(time)
     end
 
     module WaitWithSelect
-      def wait_writable(remaining_time)
-        ::IO.select(nil, [self], nil, remaining_time)
-      end
-
-      def wait_readable(remaining_time)
-        ::IO.select([self], nil, nil, remaining_time)
-      end
+      def wait_writable(time) = ::IO.select(nil, [self], nil, time)
+      def wait_readable(time) = ::IO.select([self], nil, nil, time)
     end
 
     private_constant(:WaitWithIO, :WaitWithSelect)
