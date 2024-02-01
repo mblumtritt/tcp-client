@@ -332,7 +332,7 @@ class TCPClient
     alias eql? ==
 
     # @!visibility private
-    def equal?(other) = self.class == other.class && self == other
+    def equal?(other) = self.class == other.class && to_hash == other.to_hash
 
     private
 
