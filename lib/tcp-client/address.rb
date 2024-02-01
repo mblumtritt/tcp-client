@@ -19,7 +19,7 @@ class TCPClient
     # @return [Addrinfo] the address info
     #
     def addrinfo
-      freeze if @addrinfo.nil?
+      freeze unless @addrinfo
       @addrinfo
     end
 
@@ -28,7 +28,7 @@ class TCPClient
     # @return [String] the host name
     #
     def host
-      freeze if @host.nil?
+      freeze unless @host
       @host
     end
     alias hostname host
@@ -71,9 +71,7 @@ class TCPClient
     #
     #   @param port [Integer] the addressed port
     #
-    def initialize(addr)
-      @addr = addr
-    end
+    def initialize(addr) = (@addr = addr)
 
     #
     # Convert `self` to a Hash containing host and port attribute.
@@ -106,7 +104,6 @@ class TCPClient
       solve
       @addrinfo.freeze
       @host.freeze
-      @addr = nil
       super
     end
 
@@ -130,6 +127,7 @@ class TCPClient
       else
         from_string(@addr)
       end
+      @addr = nil
     end
 
     def from_self_class(address)
@@ -142,14 +140,13 @@ class TCPClient
     end
 
     def from_addrinfo(addrinfo)
-      @host = addrinfo.getnameinfo(Socket::NI_NUMERICSERV).first
-      @addrinfo = addrinfo
+      @host = (@addrinfo = addrinfo).getnameinfo(Socket::NI_NUMERICSERV).first
     end
 
     def from_string(str)
       @host, port = host_n_port(str.to_s)
-      return @addrinfo = Addrinfo.tcp(@host, port) if @host
-      from_addrinfo(Addrinfo.tcp(nil, port))
+      @addrinfo = Addrinfo.tcp(@host, port)
+      @host ||= @addrinfo.getnameinfo(Socket::NI_NUMERICSERV).first
     end
 
     def host_n_port(str)

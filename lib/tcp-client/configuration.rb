@@ -109,7 +109,7 @@ class TCPClient
         if value.respond_to?(:to_hash)
           Hash[value.to_hash]
         elsif value.respond_to?(:to_h)
-          value.nil? ? nil : Hash[value.to_h]
+          value.nil? ? nil : value.to_h.dup
         else
           value ? {} : nil
         end
@@ -131,7 +131,7 @@ class TCPClient
     attr_reader :connect_timeout
 
     def connect_timeout=(value)
-      @connect_timeout = seconds(value)
+      @connect_timeout = as_seconds(value)
     end
 
     #
@@ -144,8 +144,7 @@ class TCPClient
     attr_reader :connect_timeout_error
 
     def connect_timeout_error=(value)
-      raise(NotAnExceptionError, value) unless exception_class?(value)
-      @connect_timeout_error = value
+      @connect_timeout_error = as_exception(value)
     end
 
     #
@@ -159,7 +158,7 @@ class TCPClient
     attr_reader :read_timeout
 
     def read_timeout=(value)
-      @read_timeout = seconds(value)
+      @read_timeout = as_seconds(value)
     end
 
     #
@@ -172,8 +171,7 @@ class TCPClient
     attr_reader :read_timeout_error
 
     def read_timeout_error=(value)
-      raise(NotAnExceptionError, value) unless exception_class?(value)
-      @read_timeout_error = value
+      @read_timeout_error = as_exception(value)
     end
 
     #
@@ -187,7 +185,7 @@ class TCPClient
     attr_reader :write_timeout
 
     def write_timeout=(value)
-      @write_timeout = seconds(value)
+      @write_timeout = as_seconds(value)
     end
 
     #
@@ -200,8 +198,7 @@ class TCPClient
     attr_reader :write_timeout_error
 
     def write_timeout_error=(value)
-      raise(NotAnExceptionError, value) unless exception_class?(value)
-      @write_timeout_error = value
+      @write_timeout_error = as_exception(value)
     end
 
     #
@@ -216,7 +213,7 @@ class TCPClient
     # @see #write_timeout
     #
     def timeout=(value)
-      @connect_timeout = @write_timeout = @read_timeout = seconds(value)
+      @connect_timeout = @write_timeout = @read_timeout = as_seconds(value)
     end
 
     #
@@ -233,9 +230,8 @@ class TCPClient
     # @see #write_timeout_error
     #
     def timeout_error=(value)
-      raise(NotAnExceptionError, value) unless exception_class?(value)
       @connect_timeout_error =
-        @read_timeout_error = @write_timeout_error = value
+        @read_timeout_error = @write_timeout_error = as_exception(value)
     end
 
     # @!endgroup
@@ -314,7 +310,7 @@ class TCPClient
     # @return [Configuration] self
     #
     def configure(options)
-      options.each_pair { |attribute, value| set(attribute, value) }
+      options.each_pair { set(*_1) }
       self
     end
 
@@ -340,13 +336,17 @@ class TCPClient
 
     private
 
-    def exception_class?(value) = value.is_a?(Class) && value < Exception
-    def seconds(value) = value&.to_f&.positive? ? value : nil
+    def as_seconds(value) = value&.to_f&.positive? ? value : nil
+
+    def as_exception(value)
+      return value if value.is_a?(Class) && value < Exception
+      raise(NotAnExceptionError, value, caller(2))
+    end
 
     def set(attribute, value)
       public_send("#{attribute}=", value)
     rescue NoMethodError
-      raise(UnknownAttributeError, attribute)
+      raise(UnknownAttributeError, attribute, caller(2))
     end
   end
 end
