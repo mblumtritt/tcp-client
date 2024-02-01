@@ -37,9 +37,7 @@ class TCPClient
     # @attribute [r] port
     # @return [Integer] the port number
     #
-    def port
-      addrinfo.ip_port
-    end
+    def port = addrinfo.ip_port
 
     #
     # Initializes an address
@@ -82,9 +80,7 @@ class TCPClient
     #
     # @return [Hash] host and port
     #
-    def to_hash
-      { host: host, port: port }
-    end
+    def to_hash = { host: host, port: port }
 
     #
     # Convert `self` to a Hash containing host and port attribute.
@@ -93,16 +89,12 @@ class TCPClient
     # @overload to_h(&block)
     # @return [Hash] host and port
     #
-    def to_h(&block)
-      block ? to_hash.to_h(&block) : to_hash
-    end
+    def to_h(&block) = block ? to_hash.to_h(&block) : to_hash
 
     #
     # @return [String] text representation of self as "host:port"
     #
-    def to_s
-      host.index(':') ? "[#{host}]:#{port}" : "#{host}:#{port}"
-    end
+    def to_s = host.index(':') ? "[#{host}]:#{port}" : "#{host}:#{port}"
 
     #
     # Force the address resolution and prevents further modifications of itself.
@@ -119,15 +111,11 @@ class TCPClient
     end
 
     # @!visibility private
-    def ==(other)
-      to_hash == other.to_h
-    end
+    def ==(other) = to_hash == other.to_h
     alias eql? ==
 
     # @!visibility private
-    def equal?(other)
-      self.class == other.class && self == other
-    end
+    def equal?(other) = self.class == other.class && self == other
 
     private
 

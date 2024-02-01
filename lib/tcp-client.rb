@@ -240,9 +240,7 @@ class TCPClient
   #
   # @see Address#to_s
   #
-  def to_s
-    @address&.to_s || ''
-  end
+  def to_s = @address.to_s
 
   #
   # Executes a block with a given overall time limit.

@@ -7,9 +7,7 @@ class TCPClient
       @deadline = timeout&.positive? ? now + timeout : nil
     end
 
-    def valid?
-      !@deadline.nil?
-    end
+    def valid? = !@deadline.nil?
 
     def remaining_time
       @deadline && (remaining = @deadline - now) > 0 ? remaining : nil
@@ -18,13 +16,9 @@ class TCPClient
     private
 
     if defined?(Process::CLOCK_MONOTONIC)
-      def now
-        Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
+      def now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     else
-      def now
-        ::Time.now
-      end
+      def now = ::Time.now
     end
   end
 

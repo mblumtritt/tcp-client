@@ -93,9 +93,7 @@ class TCPClient
     # @!parse attr_reader :ssl?
     # @return [Boolean] whether SSL is configured, see {#ssl_params}
     #
-    def ssl?
-      @ssl_params ? true : false
-    end
+    def ssl? = @ssl_params ? true : false
 
     #
     # Parameters used to initialize a SSL context. SSL/TLS will only be used if
@@ -291,9 +289,7 @@ class TCPClient
     #
     # @see #configure
     #
-    def to_h(&block)
-      block ? to_hash.to_h(&block) : to_hash
-    end
+    def to_h(&block) = block ? to_hash.to_h(&block) : to_hash
 
     #
     # Configures the instance with given options Hash.
@@ -336,30 +332,21 @@ class TCPClient
     end
 
     # @!visibility private
-    def ==(other)
-      to_hash == other.to_h
-    end
+    def ==(other) = to_hash == other.to_h
     alias eql? ==
 
     # @!visibility private
-    def equal?(other)
-      self.class == other.class && self == other
-    end
+    def equal?(other) = self.class == other.class && self == other
 
     private
 
-    def exception_class?(value)
-      value.is_a?(Class) && value < Exception
-    end
+    def exception_class?(value) = value.is_a?(Class) && value < Exception
+    def seconds(value) = value&.to_f&.positive? ? value : nil
 
     def set(attribute, value)
       public_send("#{attribute}=", value)
     rescue NoMethodError
       raise(UnknownAttributeError, attribute)
-    end
-
-    def seconds(value)
-      value&.to_f&.positive? ? value : nil
     end
   end
 end

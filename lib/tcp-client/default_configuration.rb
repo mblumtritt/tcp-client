@@ -47,9 +47,7 @@ class TCPClient
       # @see TCPClient.with_deadline
       # @see TCPClient#connect
       #
-      def default
-        TCPClient.default_configuration
-      end
+      def default = TCPClient.default_configuration
     end
   end
 end

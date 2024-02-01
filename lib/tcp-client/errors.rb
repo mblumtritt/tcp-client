@@ -6,9 +6,7 @@ class TCPClient
   # not available.
   #
   class NoOpenSSLError < RuntimeError
-    def initialize
-      super('OpenSSL is not available')
-    end
+    def initialize = super('OpenSSL is not available')
   end
 
   #
@@ -16,9 +14,7 @@ class TCPClient
   # specified.
   #
   class NoBlockGivenError < ArgumentError
-    def initialize
-      super('no block given')
-    end
+    def initialize = super('no block given')
   end
 
   #
@@ -28,9 +24,7 @@ class TCPClient
     #
     # @param timeout [Object] the invalid value
     #
-    def initialize(timeout)
-      super("invalid deadline - #{timeout}")
-    end
+    def initialize(timeout) = super("invalid deadline - #{timeout}")
   end
 
   #
@@ -40,9 +34,7 @@ class TCPClient
     #
     # @param attribute [Object] the undefined attribute
     #
-    def initialize(attribute)
-      super("unknown attribute - #{attribute}")
-    end
+    def initialize(attribute) = super("unknown attribute - #{attribute}")
   end
 
   #
@@ -74,9 +66,7 @@ class TCPClient
   # but is not connected.
   #
   class NotConnectedError < NetworkError
-    def initialize
-      super('client not connected')
-    end
+    def initialize = super('client not connected')
   end
 
   #
@@ -104,9 +94,7 @@ class TCPClient
     # @attribute [r] action
     # @return [Symbol] the action which timed out
     #
-    def action
-      :process
-    end
+    def action = :process
   end
 
   #
@@ -117,9 +105,7 @@ class TCPClient
     # @attribute [r] action
     # @return [Symbol] the action which timed out: `:connect`
     #
-    def action
-      :connect
-    end
+    def action = :connect
   end
 
   #
@@ -130,9 +116,7 @@ class TCPClient
     # @attribute [r] action
     # @return [Symbol] the action which timed out: :read`
     #
-    def action
-      :read
-    end
+    def action = :read
   end
 
   #
@@ -143,9 +127,7 @@ class TCPClient
     # @attribute [r] action
     # @return [Symbol] the action which timed out: `:write`
     #
-    def action
-      :write
-    end
+    def action = :write
   end
 
   NoOpenSSL = NoOpenSSLError # @!visibility private

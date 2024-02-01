@@ -16,7 +16,6 @@
 
 ![last commit](https://img.shields.io/github/last-commit/mblumtritt/tcp-client/main)
 ![files](https://img.shields.io/github/directory-file-count/mblumtritt/tcp-client)
-![build status](https://img.shields.io/github/workflow/status/mblumtritt/tcp-client/Test)
 ![dependencies](https://img.shields.io/librariesio/github/mblumtritt/tcp-client)
 
 ![commit activity](https://img.shields.io/github/commit-activity/m/mblumtritt/tcp-client)

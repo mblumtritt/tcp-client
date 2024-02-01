@@ -6,13 +6,8 @@ class TCPClient
       private
 
       def included(mod)
-        return if supports_wait?(mod)
-        mod.include(mod.method_defined?(:to_io) ? WaitWithIO : WaitWithSelect)
-      end
-
-      def supports_wait?(mod)
-        mod.method_defined?(:wait_writable) &&
-          mod.method_defined?(:wait_readable)
+        return if defined?(mod.wait_writable) && defined?(mod.wait_readable)
+        mod.include(defined?(mod.to_io) ? WaitWithIO : WaitWithSelect)
       end
     end
 
@@ -101,13 +96,8 @@ class TCPClient
     end
 
     module WaitWithIO
-      def wait_writable(remaining_time)
-        to_io.wait_writable(remaining_time)
-      end
-
-      def wait_readable(remaining_time)
-        to_io.wait_readable(remaining_time)
-      end
+      def wait_writable(remaining_time) = to_io.wait_writable(remaining_time)
+      def wait_readable(remaining_time) = to_io.wait_readable(remaining_time)
     end
 
     module WaitWithSelect
