@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../helper'
-
 RSpec.describe 'TCPClient.configure' do
   it 'is the default configuration' do
     expect(TCPClient.configure).to be TCPClient::Configuration.default

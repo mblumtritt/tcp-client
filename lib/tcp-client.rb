@@ -92,7 +92,6 @@ class TCPClient
   # @see #with_deadline
   #
   def self.with_deadline(timeout, address, configuration = nil)
-    client = nil
     raise(NoBlockGivenError) unless block_given?
     client = new
     client.with_deadline(timeout) do
@@ -116,9 +115,7 @@ class TCPClient
   # @attribute [r] :closed?
   # @return [Boolean] whether the connection is closed
   #
-  def closed?
-    @socket.nil? || @socket.closed?
-  end
+  def closed? = @socket.nil? || @socket.closed?
 
   #
   # Close the current connection if connected.
@@ -240,9 +237,7 @@ class TCPClient
   #
   # @see Address#to_s
   #
-  def to_s
-    @address&.to_s || ''
-  end
+  def to_s = @address.to_s
 
   #
   # Executes a block with a given overall time limit.

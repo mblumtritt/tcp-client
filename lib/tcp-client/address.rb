@@ -19,7 +19,7 @@ class TCPClient
     # @return [Addrinfo] the address info
     #
     def addrinfo
-      freeze if @addrinfo.nil?
+      freeze unless @addrinfo
       @addrinfo
     end
 
@@ -28,7 +28,7 @@ class TCPClient
     # @return [String] the host name
     #
     def host
-      freeze if @host.nil?
+      freeze unless @host
       @host
     end
     alias hostname host
@@ -37,9 +37,7 @@ class TCPClient
     # @attribute [r] port
     # @return [Integer] the port number
     #
-    def port
-      addrinfo.ip_port
-    end
+    def port = addrinfo.ip_port
 
     #
     # Initializes an address
@@ -73,18 +71,14 @@ class TCPClient
     #
     #   @param port [Integer] the addressed port
     #
-    def initialize(addr)
-      @addr = addr
-    end
+    def initialize(addr) = (@addr = addr)
 
     #
     # Convert `self` to a Hash containing host and port attribute.
     #
     # @return [Hash] host and port
     #
-    def to_hash
-      { host: host, port: port }
-    end
+    def to_hash = { host: host, port: port }
 
     #
     # Convert `self` to a Hash containing host and port attribute.
@@ -93,16 +87,12 @@ class TCPClient
     # @overload to_h(&block)
     # @return [Hash] host and port
     #
-    def to_h(&block)
-      block ? to_hash.to_h(&block) : to_hash
-    end
+    def to_h(&block) = block ? to_hash.to_h(&block) : to_hash
 
     #
     # @return [String] text representation of self as "host:port"
     #
-    def to_s
-      host.index(':') ? "[#{host}]:#{port}" : "#{host}:#{port}"
-    end
+    def to_s = host.index(':') ? "[#{host}]:#{port}" : "#{host}:#{port}"
 
     #
     # Force the address resolution and prevents further modifications of itself.
@@ -114,20 +104,15 @@ class TCPClient
       solve
       @addrinfo.freeze
       @host.freeze
-      @addr = nil
       super
     end
 
     # @!visibility private
-    def ==(other)
-      to_hash == other.to_h
-    end
+    def ==(other) = to_hash == other.to_h
     alias eql? ==
 
     # @!visibility private
-    def equal?(other)
-      self.class == other.class && self == other
-    end
+    def equal?(other) = self.class == other.class && self == other
 
     private
 
@@ -142,6 +127,7 @@ class TCPClient
       else
         from_string(@addr)
       end
+      @addr = nil
     end
 
     def from_self_class(address)
@@ -154,14 +140,13 @@ class TCPClient
     end
 
     def from_addrinfo(addrinfo)
-      @host = addrinfo.getnameinfo(Socket::NI_NUMERICSERV).first
-      @addrinfo = addrinfo
+      @host = (@addrinfo = addrinfo).getnameinfo(Socket::NI_NUMERICSERV).first
     end
 
     def from_string(str)
       @host, port = host_n_port(str.to_s)
-      return @addrinfo = Addrinfo.tcp(@host, port) if @host
-      from_addrinfo(Addrinfo.tcp(nil, port))
+      @addrinfo = Addrinfo.tcp(@host, port)
+      @host ||= @addrinfo.getnameinfo(Socket::NI_NUMERICSERV).first
     end
 
     def host_n_port(str)

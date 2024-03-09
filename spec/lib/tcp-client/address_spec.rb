@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../helper'
-
 RSpec.describe TCPClient::Address do
   subject(:address) { TCPClient::Address.new(argument) }
 

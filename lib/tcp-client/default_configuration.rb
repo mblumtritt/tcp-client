@@ -37,19 +37,15 @@ class TCPClient
   end
 
   class Configuration
-    class << self
-      #
-      # @attribute [r] :default
-      # @return [Configuration] used by default if no dedicated configuration
-      #   was specified
-      #
-      # @see TCPClient.open
-      # @see TCPClient.with_deadline
-      # @see TCPClient#connect
-      #
-      def default
-        TCPClient.default_configuration
-      end
-    end
+    #
+    # @attribute [r] :default
+    # @return [Configuration] used by default if no dedicated configuration
+    #   was specified
+    #
+    # @see TCPClient.open
+    # @see TCPClient.with_deadline
+    # @see TCPClient#connect
+    #
+    def self.default = TCPClient.default_configuration
   end
 end
