@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../helper'
-
 RSpec.describe TCPClient::Configuration do
   describe '.create' do
     it 'yields a configuration' do
