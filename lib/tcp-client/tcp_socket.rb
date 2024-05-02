@@ -2,11 +2,11 @@
 
 require 'socket'
 require_relative 'deadline'
-require_relative 'mixin/io_with_deadline'
+require_relative 'with_deadline'
 
 class TCPClient
   class TCPSocket < ::Socket
-    include IOWithDeadlineMixin
+    include WithDeadline
 
     def initialize(address, configuration, deadline, exception)
       super(address.addrinfo.ipv6? ? :INET6 : :INET, :STREAM)
