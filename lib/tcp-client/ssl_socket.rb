@@ -7,11 +7,11 @@ rescue LoadError
 end
 
 require_relative 'deadline'
-require_relative 'mixin/io_with_deadline'
+require_relative 'with_deadline'
 
 class TCPClient
   class SSLSocket < ::OpenSSL::SSL::SSLSocket
-    include IOWithDeadlineMixin
+    include WithDeadline
 
     def initialize(socket, address, configuration, deadline, exception)
       ssl_params = Hash[configuration.ssl_params]

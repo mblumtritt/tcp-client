@@ -1,16 +1,7 @@
 # frozen_string_literal: true
 
 class TCPClient
-  module IOWithDeadlineMixin
-    class << self
-      private
-
-      def included(mod)
-        return if defined?(mod.wait_writable) && defined?(mod.wait_readable)
-        mod.include(defined?(mod.to_io) ? WaitWithIO : WaitWithSelect)
-      end
-    end
-
+  module WithDeadline
     def read_with_deadline(nbytes, deadline, exception)
       raise(exception) unless deadline.remaining_time
       return fetch_avail(deadline, exception) if nbytes.nil?
@@ -79,10 +70,10 @@ class TCPClient
         case ret = yield
         when :wait_writable
           remaining_time = deadline.remaining_time or raise(exception)
-          wait_writable(remaining_time) or raise(exception)
+          wait_write[remaining_time] or raise(exception)
         when :wait_readable
           remaining_time = deadline.remaining_time or raise(exception)
-          wait_readable(remaining_time) or raise(exception)
+          wait_read[remaining_time] or raise(exception)
         else
           return ret
         end
@@ -91,18 +82,28 @@ class TCPClient
       raise(exception)
     end
 
-    module WaitWithIO
-      def wait_writable(time) = to_io.wait_writable(time)
-      def wait_readable(time) = to_io.wait_readable(time)
+    def wait_write
+      @wait_write ||=
+        if defined?(wait_writable)
+          ->(t) { wait_writable(t) }
+        elsif defined?(to_io)
+          ->(t) { to_io.wait_writable(t) }
+        else
+          ->(t) { ::IO.select(nil, [self], nil, t) }
+        end
     end
 
-    module WaitWithSelect
-      def wait_writable(time) = ::IO.select(nil, [self], nil, time)
-      def wait_readable(time) = ::IO.select([self], nil, nil, time)
+    def wait_read
+      @wait_read ||=
+        if defined?(wait_readable)
+          ->(t) { wait_readable(t) }
+        elsif defined?(to_io)
+          ->(t) { to_io.wait_readable(t) }
+        else
+          ->(t) { ::IO.select([self], nil, nil, t) }
+        end
     end
-
-    private_constant(:WaitWithIO, :WaitWithSelect)
   end
 
-  private_constant(:IOWithDeadlineMixin)
+  private_constant(:WithDeadline)
 end
