@@ -5,16 +5,15 @@ class TCPClient
     attr_accessor :exception
 
     def initialize(timeout, exception)
-      @timeout = timeout&.to_f
+      @timeout = timeout.to_f
       @exception = exception
-      @deadline = @timeout&.positive? ? now + @timeout : nil
+      @deadline = @timeout.positive? ? now + @timeout : nil
     end
 
     def valid? = !@deadline.nil?
 
     def remaining_time
-      remaining = @deadline - now
-      remaining > 0 ? remaining : timed_out!(caller(1))
+      (remaining = @deadline - now) > 0 ? remaining : timed_out!(caller(1))
     end
 
     def timed_out!(call_stack = nil)
