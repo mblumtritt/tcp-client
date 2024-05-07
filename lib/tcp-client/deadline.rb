@@ -2,15 +2,27 @@
 
 class TCPClient
   class Deadline
-    def initialize(timeout)
-      timeout = timeout&.to_f
-      @deadline = timeout&.positive? ? now + timeout : nil
+    attr_accessor :exception
+
+    def initialize(timeout, exception)
+      @timeout = timeout&.to_f
+      @exception = exception
+      @deadline = @timeout&.positive? ? now + @timeout : nil
     end
 
     def valid? = !@deadline.nil?
 
     def remaining_time
-      @deadline && (remaining = @deadline - now) > 0 ? remaining : nil
+      remaining = @deadline - now
+      remaining > 0 ? remaining : timed_out!(caller(1))
+    end
+
+    def timed_out!(call_stack = nil)
+      raise(
+        @exception,
+        "execution expired - #{@timeout} seconds",
+        call_stack || caller(1)
+      )
     end
 
     private

@@ -8,10 +8,10 @@ class TCPClient
   class TCPSocket < ::Socket
     include WithDeadline
 
-    def initialize(address, configuration, deadline, exception)
+    def initialize(address, configuration, deadline)
       super(address.addrinfo.ipv6? ? :INET6 : :INET, :STREAM)
       configure(configuration)
-      connect_to(as_addr_in(address), deadline, exception)
+      connect_to(as_addr_in(address), deadline)
     end
 
     private
@@ -21,11 +21,9 @@ class TCPClient
       ::Socket.pack_sockaddr_in(addrinfo.ip_port, addrinfo.ip_address)
     end
 
-    def connect_to(addr, deadline, exception)
+    def connect_to(addr, deadline)
       return connect(addr) unless deadline.valid?
-      with_deadline(deadline, exception) do
-        connect_nonblock(addr, exception: false)
-      end
+      with_deadline(deadline) { connect_nonblock(addr, exception: false) }
     end
 
     def configure(configuration)
