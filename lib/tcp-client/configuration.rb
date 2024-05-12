@@ -336,7 +336,7 @@ class TCPClient
 
     private
 
-    def as_seconds(value) = value&.to_f&.positive? ? value : nil
+    def as_seconds(value) = value.to_f.positive? ? value : nil
 
     def as_exception(value)
       return value if value.is_a?(Class) && value < Exception

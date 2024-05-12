@@ -2,22 +2,22 @@
 
 class TCPClient
   module WithDeadline
-    def read_with_deadline(nbytes, deadline, exception)
-      raise(exception) unless deadline.remaining_time
-      return fetch_avail(deadline, exception) if nbytes.nil?
+    def read_with_deadline(nbytes, deadline)
+      deadline.remaining_time
+      return fetch_avail(deadline) if nbytes.nil?
       @read_buffer ||= ''.b
       while @read_buffer.bytesize < nbytes
-        read = fetch_next(deadline, exception)
+        read = fetch_next(deadline)
         read ? @read_buffer << read : (break close)
       end
       fetch_slice(nbytes)
     end
 
-    def read_to_with_deadline(sep, deadline, exception)
-      raise(exception) unless deadline.remaining_time
+    def read_to_with_deadline(sep, deadline)
+      deadline.remaining_time
       @read_buffer ||= ''.b
       while (index = @read_buffer.index(sep)).nil?
-        read = fetch_next(deadline, exception)
+        read = fetch_next(deadline)
         read ? @read_buffer << read : (break close)
       end
       return fetch_slice(index + sep.bytesize) if index
@@ -26,15 +26,13 @@ class TCPClient
       result
     end
 
-    def write_with_deadline(data, deadline, exception)
+    def write_with_deadline(data, deadline)
       return 0 if (size = data.bytesize).zero?
-      raise(exception) unless deadline.remaining_time
+      deadline.remaining_time
       result = 0
       while true
         written =
-          with_deadline(deadline, exception) do
-            write_nonblock(data, exception: false)
-          end
+          with_deadline(deadline) { write_nonblock(data, exception: false) }
         return result if (result += written) >= size
         data = data.byteslice(written, data.bytesize - written)
       end
@@ -42,8 +40,8 @@ class TCPClient
 
     private
 
-    def fetch_avail(deadline, exception)
-      if (result = @read_buffer || fetch_next(deadline, exception)).nil?
+    def fetch_avail(deadline)
+      if (result = @read_buffer || fetch_next(deadline)).nil?
         close
         return ''.b
       end
@@ -59,27 +57,23 @@ class TCPClient
       result
     end
 
-    def fetch_next(deadline, exception)
-      with_deadline(deadline, exception) do
-        read_nonblock(65_536, exception: false)
-      end
+    def fetch_next(deadline)
+      with_deadline(deadline) { read_nonblock(65_536, exception: false) }
     end
 
-    def with_deadline(deadline, exception)
+    def with_deadline(deadline)
       while true
         case ret = yield
         when :wait_writable
-          remaining_time = deadline.remaining_time or raise(exception)
-          wait_write[remaining_time] or raise(exception)
+          wait_write[deadline.remaining_time] or deadline.timed_out!
         when :wait_readable
-          remaining_time = deadline.remaining_time or raise(exception)
-          wait_read[remaining_time] or raise(exception)
+          wait_read[deadline.remaining_time] or deadline.timed_out!
         else
           return ret
         end
       end
     rescue Errno::ETIMEDOUT
-      raise(exception)
+      deadline.timed_out!
     end
 
     def wait_write

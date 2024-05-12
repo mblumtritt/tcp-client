@@ -192,11 +192,15 @@ class TCPClient
   #
   def read(nbytes = nil, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?
-    deadline = create_deadline(timeout, configuration.read_timeout)
+    deadline =
+      create_deadline(
+        timeout,
+        @configuration.read_timeout,
+        exception || @configuration.read_timeout_error
+      )
     return stem_errors { @socket.read(nbytes) } unless deadline.valid?
-    exception ||= configuration.read_timeout_error
-    stem_errors(exception) do
-      @socket.read_with_deadline(nbytes, deadline, exception)
+    stem_errors(deadline.exception) do
+      @socket.read_with_deadline(nbytes, deadline)
     end
   end
 
@@ -221,13 +225,17 @@ class TCPClient
   #
   def readline(separator = $/, chomp: false, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?
-    deadline = create_deadline(timeout, configuration.read_timeout)
+    deadline =
+      create_deadline(
+        timeout,
+        @configuration.read_timeout,
+        exception || @configuration.read_timeout_error
+      )
     deadline.valid? or
       return stem_errors { @socket.readline(separator, chomp: chomp) }
-    exception ||= configuration.read_timeout_error
     line =
-      stem_errors(exception) do
-        @socket.read_to_with_deadline(separator, deadline, exception)
+      stem_errors(deadline.exception) do
+        @socket.read_to_with_deadline(separator, deadline)
       end
     chomp ? line.chomp : line
   end
@@ -265,7 +273,7 @@ class TCPClient
   def with_deadline(timeout)
     previous_deadline = @deadline
     raise(NoBlockGivenError) unless block_given?
-    @deadline = Deadline.new(timeout)
+    @deadline = Deadline.new(timeout, TimeoutError)
     raise(InvalidDeadLineError, timeout) unless @deadline.valid?
     yield(self)
   ensure
@@ -292,36 +300,46 @@ class TCPClient
   #
   def write(*messages, timeout: nil, exception: nil)
     raise(NotConnectedError) if closed?
-    deadline = create_deadline(timeout, configuration.write_timeout)
+    deadline =
+      create_deadline(
+        timeout,
+        @configuration.write_timeout,
+        exception || @configuration.write_timeout_error
+      )
     return stem_errors { @socket.write(*messages) } unless deadline.valid?
-    exception ||= configuration.write_timeout_error
-    stem_errors(exception) do
-      messages.sum do |chunk|
-        @socket.write_with_deadline(chunk.b, deadline, exception)
-      end
+    stem_errors(deadline.exception) do
+      messages.sum { |chunk| @socket.write_with_deadline(chunk.b, deadline) }
     end
   end
 
   private
 
-  def create_deadline(timeout, default)
-    timeout.nil? && @deadline ? @deadline : Deadline.new(timeout || default)
+  def create_deadline(timeout, timeout_default, exception)
+    if timeout.nil? && @deadline
+      @deadline.exception = exception
+      return @deadline
+    end
+    Deadline.new(timeout || timeout_default, exception)
   end
 
   def create_socket(timeout, exception)
-    deadline = create_deadline(timeout, configuration.connect_timeout)
-    exception ||= configuration.connect_timeout_error
-    stem_errors(exception) do
-      @socket = TCPSocket.new(address, configuration, deadline, exception)
-      return @socket unless configuration.ssl?
-      SSLSocket.new(@socket, address, configuration, deadline, exception)
+    deadline =
+      create_deadline(
+        timeout,
+        @configuration.connect_timeout,
+        exception || @configuration.connect_timeout_error
+      )
+    stem_errors(deadline.exception) do
+      @socket = TCPSocket.new(address, @configuration, deadline)
+      return @socket unless @configuration.ssl?
+      SSLSocket.new(@socket, address, @configuration, deadline)
     end
   end
 
   def stem_errors(except = nil)
     yield
   rescue *NETWORK_ERRORS => e
-    raise unless configuration.normalize_network_errors
+    raise unless @configuration.normalize_network_errors
     except && e.is_a?(except) ? raise : raise(NetworkError, e)
   end
 

@@ -177,7 +177,10 @@ RSpec.describe TCPClient do
           it 'raises an exception' do
             expect do
               client.connect('localhost:1234', configuration, timeout: 0.1)
-            end.to raise_error(TCPClient::ConnectTimeoutError)
+            end.to raise_error(
+              TCPClient::ConnectTimeoutError,
+              EXPECTED_TIMEOUT_MESSAGE
+            )
           end
 
           it 'allows to raise a custom exception' do
@@ -189,7 +192,7 @@ RSpec.describe TCPClient do
                 timeout: 0.1,
                 exception: exception
               )
-            end.to raise_error(exception)
+            end.to raise_error(exception, EXPECTED_TIMEOUT_MESSAGE)
           end
 
           it 'is still closed' do
@@ -329,7 +332,8 @@ RSpec.describe TCPClient do
           end
           it 'raises an exception' do
             expect { client.read(timeout: 0.25) }.to raise_error(
-              TCPClient::ReadTimeoutError
+              TCPClient::ReadTimeoutError,
+              EXPECTED_TIMEOUT_MESSAGE
             )
           end
 
@@ -337,7 +341,7 @@ RSpec.describe TCPClient do
             exception = Class.new(StandardError)
             expect do
               client.read(timeout: 0.25, exception: exception)
-            end.to raise_error(exception)
+            end.to raise_error(exception, EXPECTED_TIMEOUT_MESSAGE)
           end
         end
       end
@@ -471,7 +475,8 @@ RSpec.describe TCPClient do
           end
           it 'raises an exception' do
             expect { client.readline(timeout: 0.25) }.to raise_error(
-              TCPClient::ReadTimeoutError
+              TCPClient::ReadTimeoutError,
+              EXPECTED_TIMEOUT_MESSAGE
             )
           end
 
@@ -479,7 +484,7 @@ RSpec.describe TCPClient do
             exception = Class.new(StandardError)
             expect do
               client.read(timeout: 0.25, exception: exception)
-            end.to raise_error(exception)
+            end.to raise_error(exception, EXPECTED_TIMEOUT_MESSAGE)
           end
         end
       end
@@ -579,7 +584,8 @@ RSpec.describe TCPClient do
           end
           it 'raises an exception' do
             expect { client.write(data, timeout: 0.25) }.to raise_error(
-              TCPClient::WriteTimeoutError
+              TCPClient::WriteTimeoutError,
+              EXPECTED_TIMEOUT_MESSAGE
             )
           end
 
@@ -587,7 +593,7 @@ RSpec.describe TCPClient do
             exception = Class.new(StandardError)
             expect do
               client.write(data, timeout: 0.25, exception: exception)
-            end.to raise_error(exception)
+            end.to raise_error(exception, EXPECTED_TIMEOUT_MESSAGE)
           end
         end
       end
@@ -694,7 +700,10 @@ RSpec.describe TCPClient do
               client.read(12)
               client.write('Hello World!')
             end
-          end.to raise_error(TCPClient::ConnectTimeoutError)
+          end.to raise_error(
+            TCPClient::ConnectTimeoutError,
+            EXPECTED_TIMEOUT_MESSAGE
+          )
         end
       end
 
@@ -712,7 +721,10 @@ RSpec.describe TCPClient do
               client.write('Hello World!')
               client.read(12)
             end
-          end.to raise_error(TCPClient::ReadTimeoutError)
+          end.to raise_error(
+            TCPClient::ReadTimeoutError,
+            EXPECTED_TIMEOUT_MESSAGE
+          )
         end
       end
 
@@ -730,7 +742,10 @@ RSpec.describe TCPClient do
               client.read(12)
               client.write('Hello World!')
             end
-          end.to raise_error(TCPClient::WriteTimeoutError)
+          end.to raise_error(
+            TCPClient::WriteTimeoutError,
+            EXPECTED_TIMEOUT_MESSAGE
+          )
         end
       end
     end

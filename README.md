@@ -54,7 +54,7 @@ gem install tcp-client
 You can use [Bundler](http://gembundler.com/) to add TCPClient to your own project:
 
 ```shell
-bundle add 'tcp-client'
+bundle add tcp-client
 ```
 
 After that you only need one line of code to have everything together
