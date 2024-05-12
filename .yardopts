@@ -2,4 +2,9 @@
 --title 'tcp-client Documentation'
 --charset utf-8
 --markup markdown
-'lib/**/*.rb' - 'README.md' 'LICENSE'
+--tag comment
+--hide-tag comment
+lib/**/*.rb
+-
+README.md
+LICENSE
