@@ -6,7 +6,7 @@ RSpec.describe TCPClient do
     TCPClient::Configuration.create(buffered: false, reverse_lookup: false)
   end
 
-  describe 'a new instance' do
+  context 'with a new instance' do
     subject(:client) { TCPClient.new }
 
     it { is_expected.to be_closed }
@@ -34,7 +34,7 @@ RSpec.describe TCPClient do
     end
   end
 
-  describe 'a connected instance' do
+  context 'with a connected instance' do
     before { allow_any_instance_of(Socket).to receive(:connect) }
 
     it { is_expected.not_to be_closed }
@@ -75,7 +75,7 @@ RSpec.describe TCPClient do
     end
   end
 
-  describe 'an instance after #connect failed' do
+  context 'with an instance after #connect failed' do
     subject(:client) do
       TCPClient.new.tap do |instance|
         instance.connect('', configuration)

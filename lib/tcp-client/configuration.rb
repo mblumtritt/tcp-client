@@ -43,7 +43,6 @@ class TCPClient
     #
     def initialize(options = nil)
       @buffered = @keep_alive = @reverse_lookup = true
-      self.timeout = @ssl_params = nil
       @connect_timeout_error = ConnectTimeoutError
       @read_timeout_error = ReadTimeoutError
       @write_timeout_error = WriteTimeoutError
@@ -107,7 +106,7 @@ class TCPClient
     def ssl_params=(value)
       @ssl_params =
         if value.respond_to?(:to_hash)
-          Hash[value.to_hash]
+          value.to_hash.dup
         elsif value.respond_to?(:to_h)
           value.nil? ? nil : value.to_h.dup
         else
