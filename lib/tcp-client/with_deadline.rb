@@ -6,8 +6,8 @@ class TCPClient
       deadline.remaining_time
       return fetch_avail(deadline) if nbytes.nil?
       @read_buffer ||= ''.b
-      while @read_buffer.bytesize < nbytes
-        read = fetch_next(deadline)
+      while (diff = nbytes - @read_buffer.bytesize) > 0
+        read = fetch_next(deadline, diff)
         read ? @read_buffer << read : (break close)
       end
       fetch_slice(nbytes)
@@ -57,8 +57,8 @@ class TCPClient
       result
     end
 
-    def fetch_next(deadline)
-      with_deadline(deadline) { read_nonblock(65_536, exception: false) }
+    def fetch_next(deadline, size = 65_536)
+      with_deadline(deadline) { read_nonblock(size, exception: false) }
     end
 
     def with_deadline(deadline)

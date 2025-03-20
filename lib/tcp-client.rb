@@ -125,7 +125,7 @@ class TCPClient
   def close
     @socket&.close
     self
-  rescue *NETWORK_ERRORS
+  rescue *@@net_errors
     self
   ensure
     @socket = @deadline = nil
@@ -338,26 +338,24 @@ class TCPClient
 
   def stem_errors(except = nil)
     yield
-  rescue *NETWORK_ERRORS => e
+  rescue *@@net_errors => e
     raise unless @configuration.normalize_network_errors
     except && e.is_a?(except) ? raise : raise(NetworkError, e)
   end
 
-  NETWORK_ERRORS =
-    [
-      Errno::EADDRNOTAVAIL,
-      Errno::ECONNABORTED,
-      Errno::ECONNREFUSED,
-      Errno::ECONNRESET,
-      Errno::EHOSTUNREACH,
-      Errno::EINVAL,
-      Errno::ENETUNREACH,
-      Errno::EPIPE,
-      IOError,
-      SocketError
-    ].tap do |errors|
-        errors << ::OpenSSL::SSL::SSLError if defined?(::OpenSSL::SSL::SSLError)
-      end
-      .freeze
-  private_constant(:NETWORK_ERRORS)
+  @@net_errors = [
+    Errno::EADDRNOTAVAIL,
+    Errno::ECONNABORTED,
+    Errno::ECONNREFUSED,
+    Errno::EHOSTUNREACH,
+    Errno::ENETUNREACH,
+    Errno::ECONNRESET,
+    Errno::EINVAL,
+    Errno::EPIPE,
+    Errno::EPERM,
+    SocketError,
+    IOError
+  ]
+  @@net_errors << ::OpenSSL::SSL::SSLError if defined?(::OpenSSL::SSL::SSLError)
+  @@net_errors.freeze
 end

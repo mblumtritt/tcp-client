@@ -100,10 +100,11 @@ class TCPClient
     # @return [Address] itself
     #
     def freeze
-      return super if frozen?
-      solve
-      @addrinfo.freeze
-      @host.freeze
+      unless frozen?
+        solve
+        @addrinfo.freeze
+        @host.freeze
+      end
       super
     end
 

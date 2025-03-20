@@ -53,6 +53,8 @@ class TCPClient
     CONTEXT_CACHE_MODE =
       ::OpenSSL::SSL::SSLContext::SESSION_CACHE_CLIENT |
         ::OpenSSL::SSL::SSLContext::SESSION_CACHE_NO_INTERNAL_STORE
+
+    private_constant(:CONTEXT_CACHE_MODE)
   end
 
   private_constant(:SSLSocket)

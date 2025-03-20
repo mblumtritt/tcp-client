@@ -129,19 +129,4 @@ class TCPClient
     #
     def action = :write
   end
-
-  NoOpenSSL = NoOpenSSLError # @!visibility private
-  NoBlockGiven = NoBlockGivenError # @!visibility private
-  InvalidDeadLine = InvalidDeadLineError # @!visibility private
-  UnknownAttribute = UnknownAttributeError # @!visibility private
-  NotAnException = NotAnExceptionError # @!visibility private
-  NotConnected = NotConnectedError # @!visibility private
-  deprecate_constant(
-    :NoOpenSSL,
-    :NoBlockGiven,
-    :InvalidDeadLine,
-    :UnknownAttribute,
-    :NotAnException,
-    :NotConnected
-  )
 end
